@@ -1,0 +1,19 @@
+// Simple test for print statements
+glob {
+    x1
+}
+
+proc {
+}
+
+func {
+}
+
+main {
+    var { y2 }
+    
+    x1 = 42 ;
+    print x1 ;
+    print "hello world" ;
+    halt
+}

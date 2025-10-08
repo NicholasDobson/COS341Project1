@@ -1,0 +1,19 @@
+// Simple debug test
+glob {
+    x
+}
+
+proc {
+}
+
+func {
+}
+
+main {
+    var {
+        a
+    }
+    a = 5;
+    print a;
+    halt
+}

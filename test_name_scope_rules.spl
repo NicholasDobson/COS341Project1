@@ -1,0 +1,78 @@
+// SPL Test Program for NAME-SCOPE-RULES Verification
+// This program tests all the semantic rules specified
+
+glob {
+    globalVar1
+    globalVar2
+    counter
+}
+
+proc {
+    // Test procedure with parameters and local variables
+    testProc(param1 param2) {
+        local {
+            localVar1
+            localVar2
+        }
+        localVar1 = param1;
+        localVar2 = globalVar1;
+        counter = localVar2
+    }
+    
+    // Test procedure that uses global variables
+    incrementCounter() {
+        local {
+            temp
+        }
+        temp = 1;
+        counter = counter
+    }
+}
+
+func {
+    // Test function with parameters and local variables
+    addNumbers(x y) {
+        local {
+            result
+            temp
+        }
+        result = x;
+        temp = y;
+        return result
+    }
+    
+    // Test function that accesses global variables
+    getCounter() {
+        local {
+        }
+        return counter
+    }
+}
+
+main {
+    var {
+        mainVar1
+        mainVar2
+        result
+    }
+    
+    // Test assignments using different scopes
+    mainVar1 = 10;
+    globalVar1 = 20;
+    globalVar2 = 30;
+    
+    // Test procedure calls
+    testProc(mainVar1 globalVar1);
+    incrementCounter();
+    
+    // Test function calls
+    result = addNumbers(mainVar1 mainVar2);
+    mainVar2 = getCounter();
+    
+    // Test printing variables from different scopes
+    print mainVar1;
+    print globalVar1;
+    print result;
+    
+    halt
+}

@@ -1,0 +1,38 @@
+// Simplified SPL program with correct syntax
+glob {
+    result
+}
+
+proc {
+    setresult(val) {
+        local {
+        }
+        result = val
+    }
+}
+
+func {
+    add(a b) {
+        local {
+            sum
+        }
+        sum = a;
+        return sum
+    }
+}
+
+main {
+    var {
+        x
+        y
+    }
+    
+    x = 5;
+    y = 10;
+    result = 0;
+    
+    setresult(x);
+    print result;
+    
+    halt
+}

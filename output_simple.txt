@@ -1,0 +1,4 @@
+x1 = 42
+PRINT x1
+PRINT "hello world"
+HALT

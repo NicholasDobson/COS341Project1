@@ -1,0 +1,74 @@
+// COS341 Type Analysis Test Program
+// This program tests various type analysis rules
+
+glob {
+    x1
+    y2
+}
+
+proc {
+    testproc3 ( a4 b5 ) {
+        local { c6 }
+        c6 = ( a4 plus b5 ) ;
+        print c6
+    }
+}
+
+func {
+    testfunc7 ( p8 q9 ) {
+        local { r10 }
+        r10 = ( p8 mult q9 ) ;
+        return r10
+    }
+}
+
+main {
+    var { z11 w12 }
+    
+    // Test numeric assignments
+    z11 = 42 ;
+    w12 = ( z11 plus 10 ) ;
+    
+    // Test boolean conditions
+    if ( z11 > 30 ) {
+        print "z11 is large"
+    } ;
+    
+    // Test while loop with boolean condition
+    while ( w12 > 0 ) {
+        w12 = ( w12 minus 1 ) ;
+        if ( w12 eq 0 ) {
+            halt
+        }
+    } ;
+    
+    // Test procedure call
+    testproc3 ( z11 w12 ) ;
+    
+    // Test function call assignment
+    x1 = testfunc7 ( 5 3 ) ;
+    
+    // Test print with variable
+    print x1 ;
+    
+    // Test do-until loop
+    do {
+        x1 = ( x1 minus 1 )
+    } until ( x1 eq 0 ) ;
+    
+    // Test boolean operations
+    if ( ( z11 > 20 ) and ( w12 eq 0 ) ) {
+        print "both conditions true" 
+    } else {
+        print "at least one condition false"
+    } ;
+    
+    // Test unary operations
+    y2 = ( neg x1 ) ;
+    
+    if ( not ( y2 > 0 ) ) {
+        print "y2 is not positive"
+    } ;
+    
+    halt
+}

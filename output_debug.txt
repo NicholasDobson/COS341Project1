@@ -1,0 +1,7 @@
+DECLARE x
+MAIN:
+  LOCAL a
+  a = 5
+  PRINT a
+  HALT
+ENDMAIN

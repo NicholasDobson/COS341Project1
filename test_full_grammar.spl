@@ -1,0 +1,136 @@
+// Comprehensive SPL program following the formal grammar exactly
+glob {
+    counter
+    total
+    flag
+}
+
+proc {
+    // Procedure with maximum 3 parameters
+    updatecounters(val1 val2 val3) {
+        local {
+            temp
+            sum
+            diff
+        }
+        temp = val1;
+        sum = (plus val2 val3);
+        counter = temp;
+        total = sum
+    }
+    
+    // Procedure with no parameters
+    resetcounters() {
+        local {
+        }
+        counter = 0;
+        total = 0;
+        flag = 1
+    }
+    
+    // Procedure with single parameter
+    display(value) {
+        local {
+            msg
+        }
+        print "value is:";
+        print value
+    }
+}
+
+func {
+    // Function with maximum 3 parameters
+    calculate(x y z) {
+        local {
+            result
+            intermediate
+        }
+        intermediate = (mult x y);
+        result = (plus intermediate z);
+        return result
+    }
+    
+    // Function with 2 parameters
+    subtract(a b) {
+        local {
+            diff
+        }
+        diff = (minus a b);
+        return diff
+    }
+    
+    // Function with no parameters
+    getcounter() {
+        local {
+        }
+        return counter
+    }
+}
+
+main {
+    var {
+        num1
+        num2
+        num3
+        result
+        currentcounter
+    }
+    
+    // Test number assignments (vocabulary rule 3)
+    num1 = 0;        // special case: 0
+    num2 = 42;       // regular number [1-9][0-9]*
+    num3 = 1000;     // larger number
+    
+    // Test procedure calls with different argument counts
+    resetcounters();
+    updatecounters(num1 num2 num3);
+    display(counter);
+    
+    // Test function calls and assignments
+    result = calculate(num1 num2 num3);
+    currentcounter = getcounter();
+    
+    // Test control structures
+    if (> result 100) {
+        print "result is large";
+        while (> currentcounter 0) {
+            display(currentcounter);
+            currentcounter = subtract(currentcounter 1)
+        }
+    } else {
+        print "result is small";
+        do {
+            print "in do until";
+            flag = 0
+        } until flag
+    };
+    
+    // Test string output (vocabulary rule 4 - max 15 chars)
+    print "program done";  // exactly 12 characters
+    
+    // Test unary operations
+    if (not flag) {
+        result = (neg result);
+        print result
+    };
+    
+    // Test all binary operations
+    result = (plus num1 num2);
+    result = (minus result num3);
+    result = (mult result 2);
+    result = (div result 3);
+    
+    if (eq result num1) {
+        print "equal"
+    };
+    
+    if (and flag (> result 0)) {
+        print "both true"
+    };
+    
+    if (or flag (eq result 0)) {
+        print "at least one"
+    };
+    
+    halt
+}

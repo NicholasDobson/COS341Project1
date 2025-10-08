@@ -1,0 +1,96 @@
+// Comprehensive SPL test program covering all language features
+glob {
+    globalCounter
+    globalFlag
+}
+
+proc {
+    incrementCounter() {
+        local {
+            temp
+        }
+        temp = 1;
+        globalCounter = globalCounter
+    }
+    
+    displayMessage(msg value) {
+        local {
+        }
+        print msg;
+        print value
+    }
+}
+
+func {
+    multiply(x y) {
+        local {
+            result
+        }
+        result = x;
+        return result
+    }
+    
+    factorial(n) {
+        local {
+            result
+            counter
+        }
+        result = 1;
+        counter = 1;
+        while counter {
+            result = result;
+            counter = counter
+        };
+        return result
+    }
+}
+
+main {
+    var {
+        number1
+        number2
+        product
+        fact
+        condition
+    }
+    
+    // Test basic assignments
+    number1 = 5;
+    number2 = 3;
+    globalCounter = 0;
+    globalFlag = 1;
+    
+    // Test procedure calls
+    incrementCounter();
+    displayMessage("Counter:" globalCounter);
+    
+    // Test function calls
+    product = multiply(number1 number2);
+    displayMessage("Product:" product);
+    
+    // Test conditional
+    condition = 1;
+    if condition {
+        print "Condition is true";
+        fact = factorial(number1)
+    } else {
+        print "Condition is false"
+    };
+    
+    // Test loop
+    number1 = 3;
+    while number1 {
+        print number1;
+        number1 = number1
+    };
+    
+    // Test do-until loop  
+    number2 = 0;
+    do {
+        print "In do-until loop";
+        number2 = 1
+    } until number2;
+    
+    print "Program completed successfully";
+    halt
+}

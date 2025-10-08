@@ -1,0 +1,54 @@
+// SPL program with procedures and functions
+glob {
+    counter
+}
+
+proc {
+    increment() {
+        local {
+        }
+        counter = (plus counter 1)
+    }
+    
+    display(val) {
+        local {
+        }
+        print val
+    }
+}
+
+func {
+    add(a b) {
+        local {
+            result
+        }
+        result = (plus a b);
+        return result
+    }
+}
+
+main {
+    var {
+        x
+        y
+        sum
+    }
+    
+    counter = 0;
+    x = 5;
+    y = 10;
+    
+    increment();
+    display(counter);
+    
+    sum = add(x y);
+    display(sum);
+    
+    if (> sum 10) {
+        print "Sum is greater than 10"
+    } else {
+        print "Sum is not greater than 10"
+    };
+    
+    halt
+}

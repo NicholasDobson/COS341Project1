@@ -1,0 +1,66 @@
+// Simple SPL program to test COS341 code generation rules
+glob {
+    x
+    y
+    result
+}
+
+proc {
+    display(value) {
+        local {
+        }
+        print "result:";
+        print value
+    }
+}
+
+func {
+    add(a b) {
+        local {
+            sum
+        }
+        sum = (plus a b);
+        return sum
+    }
+}
+
+main {
+    var {
+        num1
+        num2
+        total
+    }
+    
+    // Test variable assignments
+    num1 = 10;
+    num2 = 20;
+    x = num1;
+    y = num2;
+    
+    // Test function call assignment
+    total = add(x y);
+    result = total;
+    
+    // Test procedure call
+    display(result);
+    
+    // Test conditional
+    if (> total 25) {
+        print "large result"
+    } else {
+        print "small result"
+    };
+    
+    // Test while loop
+    while (> num1 0) {
+        print num1;
+        num1 = (minus num1 1)
+    };
+    
+    // Test print with different types
+    print "done";
+    print 42;
+    print result;
+    
+    halt
+}

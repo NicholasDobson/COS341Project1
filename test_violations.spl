@@ -1,0 +1,49 @@
+// SPL Test Program with NAME-SCOPE-RULES Violations
+// This program intentionally violates rules to test error detection
+
+glob {
+    testVar
+    testVar        // VIOLATION: Duplicate global variable
+    conflictName
+}
+
+proc {
+    // VIOLATION: Procedure name conflicts with global variable
+    conflictName() {
+        local {
+        }
+        testVar = 1
+    }
+    
+    // Test parameter shadowing violation
+    shadowTest(param1 param2) {
+        local {
+            param1     // VIOLATION: Local variable shadows parameter
+            localVar
+            localVar   // VIOLATION: Duplicate local variable
+        }
+        param1 = param2;
+        undeclaredVar = 5    // VIOLATION: Undeclared variable
+    }
+}
+
+func {
+    // VIOLATION: Function name same as procedure name
+    conflictName() {
+        local {
+        }
+        return 0
+    }
+}
+
+main {
+    var {
+        mainVar
+        mainVar        // VIOLATION: Duplicate main variable
+    }
+    
+    mainVar = 10;
+    anotherUndeclared = 20;  // VIOLATION: Undeclared variable
+    print mainVar;
+    halt
+}

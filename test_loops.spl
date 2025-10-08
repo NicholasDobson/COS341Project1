@@ -1,0 +1,44 @@
+// SPL program with loops
+glob {
+    n
+}
+
+proc {
+}
+
+func {
+    factorial(num) {
+        local {
+            result
+            i
+        }
+        result = 1;
+        i = 1;
+        while (> num 0) {
+            result = (mult result num);
+            num = (minus num 1)
+        };
+        return result
+    }
+}
+
+main {
+    var {
+        number
+        fact
+        count
+    }
+    
+    number = 5;
+    fact = factorial(number);
+    print "Factorial of 5 is:";
+    print fact;
+    
+    count = 0;
+    do {
+        print count;
+        count = (plus count 1)
+    } until (eq count 3);
+    
+    halt
+}

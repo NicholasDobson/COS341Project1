@@ -1,0 +1,12 @@
+number = 5
+fact = CALL factorial(number)
+PRINT "Factorial of 5 is:"
+PRINT fact
+count = 0
+_L1:
+PRINT count
+_t1 = count + 1
+count = _t1
+_t2 = count == 3
+IF NOT _t2 GOTO _L1
+HALT

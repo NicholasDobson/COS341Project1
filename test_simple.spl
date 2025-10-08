@@ -1,0 +1,24 @@
+// Simple SPL program for testing
+glob {
+    x
+    y
+}
+
+proc {
+}
+
+func {
+}
+
+main {
+    var {
+        a
+        b
+    }
+    
+    a = 10;
+    b = 20;
+    print a;
+    print b;
+    halt
+}

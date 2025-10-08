@@ -1,0 +1,23 @@
+DECLARE result
+PROC setresult:
+  PARAM val
+  result = val
+  RETURN
+ENDPROC setresult
+FUNC add:
+  PARAM a
+  PARAM b
+  LOCAL sum
+  sum = a
+  RETURN sum
+ENDFUNC add
+MAIN:
+  LOCAL x
+  LOCAL y
+  x = 5
+  y = 10
+  result = 0
+  CALL setresult(x)
+  PRINT result
+  HALT
+ENDMAIN
