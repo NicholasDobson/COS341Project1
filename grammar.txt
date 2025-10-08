@@ -1,0 +1,56 @@
+SPL_PROG ::= glob { VARIABLES } // comment: may have globals
+             proc { PROCDEFS } // comment: without any return
+             func { FUNCDEFS } // comment: return something
+             main { MAINPROG }
+VARIABLES ::= // comment: nothing, nullable
+VARIABLES ::= VAR VARIABLES
+VAR ::= user-defined-name // comment: vocabulary: see below
+NAME ::= user-defined-name
+PROCDEFS ::= // comment: nothing, nullable
+PROCDEFS ::= PDEF PROCDEFS
+PDEF ::= NAME ( PARAM ) { BODY } // procedures return nothing
+FDEF ::= NAME ( PARAM ) { BODY ; return ATOM }
+FUNCDEFS ::= FDEF FUNCDEFS
+FUNCDEFS ::= // comment: nothing, nullable
+BODY ::= local { MAXTHREE } ALGO // may have local variables
+PARAM ::= MAXTHREE // We do not want to make the language SPL too complicated
+MAXTHREE ::= // comment: nothing, nullable
+MAXTHREE ::= VAR
+MAXTHREE ::= VAR VAR
+MAXTHREE ::= VAR VAR VAR// comment: for simplicity not more than three
+MAINPROG ::= var { VARIABLES } ALGO // may have local variables
+ATOM ::= VAR
+ATOM ::= number // comment: vocabulary: see below
+ALGO ::= INSTR // in SPL we do not allow "empty" algorithms
+ALGO ::= INSTR ; ALGO
+INSTR ::= halt
+INSTR ::= print OUTPUT
+INSTR ::= NAME ( INPUT ) // comment: procedure call
+INSTR ::= ASSIGN
+INSTR ::= LOOP
+INSTR ::= BRANCH
+ASSIGN ::= VAR = NAME ( INPUT ) // comment: Function call
+ASSIGN ::= VAR = TERM
+LOOP ::= while TERM { ALGO }
+LOOP ::= do { ALGO } until TERM
+BRANCH ::= if TERM { ALGO }
+BRANCH ::= if TERM { ALGO } else { ALGO }
+OUTPUT ::= ATOM
+OUTPUT := string // comment: Vocabulary: see below
+INPUT ::= // comment: nothing, nullable
+INPUT ::= ATOM
+INPUT ::= ATOM ATOM
+INPUT ::= ATOM ATOM ATOM // comment: must match parameters!
+TERM ::= ATOM
+TERM ::= ( UNOP TERM )
+TERM ::= ( TERM BINOP TERM )
+UNOP ::= neg
+UNOP ::= not
+BINOP ::= eq
+BINOP ::= >
+BINOP ::= or
+BINOP ::= and
+BINOP ::= plus
+BINOP ::= minus
+BINOP ::= mult
+BINOP ::= div

@@ -1,12 +1,56 @@
-number = 5
-fact = CALL factorial(number)
-PRINT "Factorial of 5 is:"
-PRINT fact
-count = 0
+num1 = 0
+num2 = 42
+num3 = 1000
+CALL resetcounters()
+CALL updatecounters(num1, num2, num3)
+CALL display(counter)
+result = CALL calculate(num1, num2, num3)
+currentcounter = CALL getcounter()
+_t1 = result > 100
+IF NOT _t1 GOTO _L1
+PRINT "result is large"
+_L3:
+_t2 = currentcounter > 0
+IF NOT _t2 GOTO _L4
+CALL display(currentcounter)
+currentcounter = CALL subtract(currentcounter, 1)
+GOTO _L3
+_L4:
+GOTO _L2
 _L1:
-PRINT count
-_t1 = count + 1
-count = _t1
-_t2 = count == 3
-IF NOT _t2 GOTO _L1
+PRINT "result is small"
+_L5:
+PRINT "in do until"
+flag = 0
+IF NOT flag GOTO _L5
+_L2:
+PRINT "program done"
+_t3 = NOT flag
+IF NOT _t3 GOTO _L6
+_t4 = NEG result
+result = _t4
+PRINT result
+_L6:
+_t5 = num1 + num2
+result = _t5
+_t6 = result - num3
+result = _t6
+_t7 = result * 2
+result = _t7
+_t8 = result / 3
+result = _t8
+_t9 = result == num1
+IF NOT _t9 GOTO _L8
+PRINT "equal"
+_L8:
+_t10 = result > 0
+_t11 = flag && _t10
+IF NOT _t11 GOTO _L10
+PRINT "both true"
+_L10:
+_t12 = result == 0
+_t13 = flag || _t12
+IF NOT _t13 GOTO _L12
+PRINT "at least one"
+_L12:
 HALT

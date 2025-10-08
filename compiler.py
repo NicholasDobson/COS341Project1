@@ -15,17 +15,6 @@ from enum import Enum
 import sys
 import os
 
-# ANTLR imports (optional)
-try:
-    from antlr4 import *
-    from SPLLexer import SPLLexer
-    from SPLParser import SPLParser
-    from SPLVisitor import SPLVisitor
-    ANTLR_AVAILABLE = True
-except ImportError:
-    ANTLR_AVAILABLE = False
-    print("ANTLR not available. Using hand-written parser only.")
-
 # ============================================================================
 # ENUMS AND DATA STRUCTURES
 # ============================================================================
@@ -544,14 +533,17 @@ class Parser:
         
     def parse_algo(self) -> AlgoNode:
         node = AlgoNode(node_id=self.st.get_node_id(), line=self.current().line)
-        node.instructions.append(self.parse_instr())
         
-        while self.match(';'):
-            self.consume(';')
-            if not self.match('}') and not self.match('until') and not self.match('return'):
-                node.instructions.append(self.parse_instr())
-            else:
-                break
+        # Check if we have any instructions (algorithm might be empty)
+        if not self.match('}') and not self.match('return') and not self.match('until'):
+            node.instructions.append(self.parse_instr())
+            
+            while self.match(';'):
+                self.consume(';')
+                if not self.match('}') and not self.match('until') and not self.match('return'):
+                    node.instructions.append(self.parse_instr())
+                else:
+                    break
         return node
         
     def parse_instr(self) -> InstrNode:
@@ -1664,13 +1656,13 @@ class TypeAnalyzer:
         
         Semantic Attribution:
         LOOP is correctly typed if:
-        - TERM is of type "boolean"
+        - TERM is of type "boolean" or "numeric" (numeric allows implicit boolean conversion)
         - ALGO is correctly typed
         """
         if loop.condition:
             term_type = self.get_term_type(loop.condition)
-            if term_type != VarType.BOOLEAN:
-                self.st.add_error("Loop condition TERM is not of type 'boolean'")
+            if term_type not in [VarType.BOOLEAN, VarType.NUMERIC]:
+                self.st.add_error(f"Loop condition TERM must be 'boolean' or 'numeric', got '{term_type.value}'")
                 return False
         
         algo_correct = self.check_algo(loop.body)
@@ -1683,13 +1675,13 @@ class TypeAnalyzer:
         
         Semantic Attribution:
         BRANCH is correctly typed if:
-        - TERM is of type "boolean"
+        - TERM is of type "boolean" or "numeric" (numeric allows implicit boolean conversion)
         - Both ALGO are correctly typed
         """
         if branch.condition:
             term_type = self.get_term_type(branch.condition)
-            if term_type != VarType.BOOLEAN:
-                self.st.add_error("Branch condition TERM is not of type 'boolean'")
+            if term_type not in [VarType.BOOLEAN, VarType.NUMERIC]:
+                self.st.add_error(f"Branch condition TERM must be 'boolean' or 'numeric', got '{term_type.value}'")
                 return False
         
         then_correct = self.check_algo(branch.then_branch)
@@ -1789,15 +1781,21 @@ class TypeAnalyzer:
         
         Semantic Attribution:
         - TERM (left) is of type "numeric" if UNOP is "numeric" and TERM (right) is "numeric"
-        - TERM (left) is of type "boolean" if UNOP is "boolean" and TERM (right) is "boolean"
+        - TERM (left) is of type "boolean" if UNOP is "boolean" and TERM (right) is "boolean" or "numeric"
+        Note: 'not' operator can work with numeric operands (implicit boolean conversion)
         """
         operand_type = self.get_term_type(term.term)
         unop_type = self.get_unop_type(term.op)
         
         if unop_type == VarType.NUMERIC and operand_type == VarType.NUMERIC:
             return VarType.NUMERIC
-        elif unop_type == VarType.BOOLEAN and operand_type == VarType.BOOLEAN:
-            return VarType.BOOLEAN
+        elif unop_type == VarType.BOOLEAN:
+            # 'not' operator can work with boolean or numeric operands
+            if operand_type in [VarType.BOOLEAN, VarType.NUMERIC]:
+                return VarType.BOOLEAN
+            else:
+                self.st.add_error(f"UNOP '{term.op}' requires 'boolean' or 'numeric' operand, got '{operand_type.value}'")
+                return VarType.TYPELESS
         else:
             self.st.add_error(f"UNOP '{term.op}' type mismatch: operator is {unop_type.value}, operand is {operand_type.value}")
             return VarType.TYPELESS
@@ -1823,10 +1821,11 @@ class TypeAnalyzer:
                 return VarType.TYPELESS
                 
         elif binop_type == VarType.BOOLEAN:
-            if left_type == VarType.BOOLEAN and right_type == VarType.BOOLEAN:
+            # Boolean operators (and, or) can work with boolean or numeric operands
+            if left_type in [VarType.BOOLEAN, VarType.NUMERIC] and right_type in [VarType.BOOLEAN, VarType.NUMERIC]:
                 return VarType.BOOLEAN
             else:
-                self.st.add_error(f"Boolean BINOP '{term.op}' requires both operands to be 'boolean', got {left_type.value} and {right_type.value}")
+                self.st.add_error(f"Boolean BINOP '{term.op}' requires operands to be 'boolean' or 'numeric', got {left_type.value} and {right_type.value}")
                 return VarType.TYPELESS
                 
         elif binop_type == VarType.COMPARISON:
@@ -2375,51 +2374,6 @@ class CodeGenerator:
         else:
             return str(atom.value)
 
-# ============================================================================
-# ANTLR VISITOR (OPTIONAL)
-# ============================================================================
-
-if ANTLR_AVAILABLE:
-    class SPLASTVisitor(SPLVisitor):
-        def __init__(self, symbol_table: SymbolTable):
-            self.st = symbol_table
-            
-        def visitSpl_prog(self, ctx):
-            node = ProgramNode(node_id=self.st.get_node_id())
-            
-            # Visit variables
-            if ctx.variables():
-                node.variables = self.visit(ctx.variables())
-            
-            # Visit procedures
-            if ctx.procdefs():
-                node.procedures = self.visit(ctx.procdefs())
-            
-            # Visit functions
-            if ctx.funcdefs():
-                node.functions = self.visit(ctx.funcdefs())
-            
-            # Visit main
-            if ctx.mainprog():
-                node.main = self.visit(ctx.mainprog())
-                
-            return node
-        
-        def visitVariables(self, ctx):
-            vars = []
-            for var_ctx in ctx.var():
-                vars.append(var_ctx.USER_DEFINED_NAME().getText())
-            return vars
-        
-        def visitMainprog(self, ctx):
-            node = MainProgNode(node_id=self.st.get_node_id())
-            if ctx.variables():
-                node.variables = self.visit(ctx.variables())
-            if ctx.algo():
-                node.body = self.visit(ctx.algo())
-            return node
-        
-        # Add more visitor methods as needed...
 
 # ============================================================================
 # MAIN COMPILER
