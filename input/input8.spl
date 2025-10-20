@@ -1,0 +1,62 @@
+//Parse errors caught
+
+glob {
+}
+
+proc {
+    logevent ( eventid ) {
+        local { logentry }
+        logentry = ( eventid plus 100 );
+        print "Event logged ";
+        print logentry
+    }
+}
+
+func {
+    validateinput ( num1 num2 num3 ) {
+        local { validsum }
+        validsum = ( ( num1 plus num2 ) plus num3 );
+        return validsum
+    }
+
+    generateid () {
+        local { idbase }
+        idbase = 42;
+        return idbase
+    }
+}
+
+main {
+    var { input1 input2 input3 validator tempid outputstr }
+    input1 = 1;
+    input2 = 2;
+    input3 = 3;
+
+    validator = validateinput ( input1 input2 input3 );
+
+    if ( validator eq 6 ) {
+        tempid = generateid ();
+        logevent ( tempid );
+        print "Validation passed"
+    } else {
+        print "Invalid inputs";
+        halt
+    };
+
+    while ( input1 < 5 ) {
+        input2 = ( input2 plus input1 );
+        input3 = ( not ( input3 eq 0 ) );
+        validator = ( validator plus 1 );
+        print input2;
+        input1 = ( input1 plus 1 )
+    };
+
+    do {
+        outputstr = "Looping";
+        print outputstr;
+        validator = ( validator minus 1 )
+    } until ( validator eq 0 );
+
+    print "All tests complete";
+    halt
+}

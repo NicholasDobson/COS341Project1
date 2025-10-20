@@ -1,0 +1,70 @@
+// Type Error Caught
+
+glob {
+    counter
+    threshold
+}
+proc {
+    increment ( val ) {
+        local { }
+        val = ( val plus 1 );
+        counter = ( counter plus 1 )
+    }
+    reset () {
+        local { }
+        counter = 0
+    }
+}
+func {
+    checkthreshold ( value ) {
+        local { result }
+        result = ( value eq threshold );
+        return result
+    }
+    computesum ( a b ) {
+        local { total }
+        total = ( a plus b );
+        return total
+    }
+}
+main {
+    var { x y z message }
+    x = 5;
+    y = 10;
+    threshold = 15;
+    z = computesum ( x y );
+    print z;
+    print "Sum computed";
+    
+    if ( threshold > z ) {
+        print "Above threshold";
+        increment ( x )
+    } else {
+        print "Below threshold";
+        reset ()
+    };
+
+    while ( 20 > x ) {
+        increment ( x );
+
+        if ( x eq 10 ) {
+            print x;
+            y = ( neg y )
+        };
+
+        z = ( z plus x )
+    };
+
+    do {
+        y = ( y mult 2 );
+        print y
+    } until ( y > 100 );
+
+    print "Final x ";
+    print x;
+    print "Final y ";
+    print y;
+    print "Final z ";
+    print z;
+    halt
+}

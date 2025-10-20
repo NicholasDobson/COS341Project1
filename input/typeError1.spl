@@ -1,0 +1,14 @@
+// \/ Error Caught - Term not numeric
+
+glob { }
+
+proc { }
+
+func { }
+
+main {
+    var { a }
+    a = ( not ( 5 eq 3 ) );
+    print a;
+    halt
+}

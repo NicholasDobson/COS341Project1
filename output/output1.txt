@@ -1,0 +1,7 @@
+a = 5
+_t1 = a + 3
+b = _t1
+_t2 = b * 2
+c = _t2
+PRINT c
+HALT

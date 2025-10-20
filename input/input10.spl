@@ -1,0 +1,26 @@
+//Parse errors caught
+
+glob { }
+
+proc {
+    display ( val ) {
+        print val
+    }
+}
+
+func {
+    getnum () {
+        local { }
+        return y                 
+    }
+}
+
+main {
+    var { p q }
+    p = 7;
+    q = 3;
+
+    r = getnum ();               
+    s = display ( p );           
+    halt
+}

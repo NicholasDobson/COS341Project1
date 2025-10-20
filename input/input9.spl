@@ -1,0 +1,31 @@
+//Scoping errors, undeclared variables
+
+glob { g1 g2 }
+
+proc {
+    showvalue ( v ) {
+        local { }
+        print v
+    }
+}
+
+func {
+    multiply ( a b ) {
+        local { prod }
+        prod = ( a mult b );
+        return prod
+    }
+}
+
+main {
+    var { a b }
+    a = 4;
+    b = 2;
+
+    d = multiply ( a c );        
+
+    c = multiply ( a );          
+
+    showvalue ( x );             
+    halt
+}

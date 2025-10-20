@@ -1,0 +1,20 @@
+// \/ Error Caught
+
+glob { }
+
+proc { }
+
+func {
+    badmix ( a b ) {
+        local { res flag }
+        flag = ( a eq b );          // boolean
+        res = ( flag plus a );      // flag not numeric
+        return res
+    }
+}
+
+main {
+    var { x }
+    x = badmix ( 3 4 );
+    halt
+}

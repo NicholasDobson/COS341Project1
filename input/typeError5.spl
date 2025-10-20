@@ -1,0 +1,19 @@
+// \/ Error Caught
+
+glob { }
+
+proc { }
+
+func { }
+
+main {
+    var { x }
+    x = 5;
+
+    while ( x ) {             //numeric used as boolean
+        print "Loop";
+        x = ( x minus 1 )
+    };
+
+    halt
+}

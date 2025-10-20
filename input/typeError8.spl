@@ -1,0 +1,16 @@
+// \/ Error Caught
+
+glob { }
+
+proc { }
+
+func { }
+
+main {
+    var { a b result }
+    a = 3;
+    b = 4;
+    result = ( ( a > b ) plus 2 );    // (a > b) is boolean
+    print result;
+    halt
+}

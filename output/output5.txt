@@ -1,0 +1,10 @@
+a = 5
+b = 10
+CALL greet(a)
+sum = CALL add(a, b)
+product = CALL multiply(a, b)
+PRINT "Sum is "
+PRINT sum
+PRINT "Product is "
+PRINT product
+HALT

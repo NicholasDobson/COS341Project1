@@ -1639,9 +1639,11 @@ class TypeAnalyzer:
             # Check INPUT
             return self.check_input(call.args)
         elif isinstance(assign.expr, TermNode):
+            print(f"x is TermNode")
             # Term assignment
             term_type = self.get_term_type(assign.expr)
             if term_type != VarType.NUMERIC:
+                print(f"Term type for '{assign.var}': {term_type}")
                 self.st.add_error(f"Assignment to '{assign.var}': TERM is not of type 'numeric'")
                 return False
             return True
@@ -1661,8 +1663,9 @@ class TypeAnalyzer:
         """
         if loop.condition:
             term_type = self.get_term_type(loop.condition)
-            if term_type not in [VarType.BOOLEAN, VarType.NUMERIC]:
-                self.st.add_error(f"Loop condition TERM must be 'boolean' or 'numeric', got '{term_type.value}'")
+            # if term_type not in [VarType.BOOLEAN, VarType.NUMERIC]: should only be boolean not numeric
+            if term_type != VarType.BOOLEAN:
+                self.st.add_error(f"Loop condition TERM must be 'boolean', got '{term_type.value}'")
                 return False
         
         algo_correct = self.check_algo(loop.body)
@@ -1755,6 +1758,7 @@ class TypeAnalyzer:
             return VarType.NUMERIC
     
     def get_term_type(self, term: TermNode) -> VarType:
+        # print(f"Getting type for TermNode: {term}")
         """
         Determine the type of a TERM based on composition rules.
         
@@ -1791,7 +1795,8 @@ class TypeAnalyzer:
             return VarType.NUMERIC
         elif unop_type == VarType.BOOLEAN:
             # 'not' operator can work with boolean or numeric operands
-            if operand_type in [VarType.BOOLEAN, VarType.NUMERIC]:
+            # if operand_type in [VarType.BOOLEAN, VarType.NUMERIC]:
+            if operand_type == VarType.BOOLEAN:
                 return VarType.BOOLEAN
             else:
                 self.st.add_error(f"UNOP '{term.op}' requires 'boolean' or 'numeric' operand, got '{operand_type.value}'")
@@ -1822,7 +1827,8 @@ class TypeAnalyzer:
                 
         elif binop_type == VarType.BOOLEAN:
             # Boolean operators (and, or) can work with boolean or numeric operands
-            if left_type in [VarType.BOOLEAN, VarType.NUMERIC] and right_type in [VarType.BOOLEAN, VarType.NUMERIC]:
+            # if left_type in [VarType.BOOLEAN, VarType.NUMERIC] and right_type in [VarType.BOOLEAN, VarType.NUMERIC]:
+            if left_type == VarType.BOOLEAN and right_type == VarType.BOOLEAN:
                 return VarType.BOOLEAN
             else:
                 self.st.add_error(f"Boolean BINOP '{term.op}' requires operands to be 'boolean' or 'numeric', got {left_type.value} and {right_type.value}")

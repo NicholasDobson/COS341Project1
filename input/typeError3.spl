@@ -1,0 +1,14 @@
+// \/ Error Caught - Asign, Term should be numeric (boolean here)
+
+glob { }
+
+proc { }
+
+func { }
+
+main {
+    var { x y }
+    x = ( 5 eq 5 );
+    y = ( x plus 3 );
+    halt
+}

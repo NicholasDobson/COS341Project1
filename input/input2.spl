@@ -1,0 +1,17 @@
+glob { }
+proc { }
+func {
+    double ( x ) {
+        local { }
+        x = ( x mult 2 );
+        return x
+    }
+}
+
+main {
+    var { num result }
+    num = 7;
+    result = double ( num );
+    print result;
+    halt
+}

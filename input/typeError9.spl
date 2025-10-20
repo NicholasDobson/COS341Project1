@@ -1,0 +1,18 @@
+// \/ Error Caught
+
+glob { }
+
+proc { }
+
+func { }
+
+main {
+    var { n }
+    n = 5;
+
+    while ( n ) {             //n is numeric, not boolean
+        n = ( n minus 1 )
+    };
+
+    halt
+}

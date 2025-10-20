@@ -1,0 +1,30 @@
+glob {
+    g
+}
+
+proc {
+    show ( x ) {
+        local { }
+        print "value ";
+        print x
+    }
+}
+
+func {
+    square ( x ) {
+        local {}
+        x = ( x mult x );
+        return x
+    }
+}
+
+main {
+    var { a b c }
+    a = 4;
+    b = square ( a );
+    c = ( b plus 10 );
+
+    show ( c );
+
+    halt
+}

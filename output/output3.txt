@@ -1,0 +1,6 @@
+a = 4
+b = CALL square(a)
+_t1 = b + 10
+c = _t1
+CALL show(c)
+HALT

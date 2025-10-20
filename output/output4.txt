@@ -1,0 +1,13 @@
+i = 1
+sum = 0
+_L1:
+_t1 = 5 > i
+IF NOT _t1 GOTO _L2
+_t2 = sum + i
+sum = _t2
+_t3 = i + 1
+i = _t3
+GOTO _L1
+_L2:
+PRINT sum
+HALT

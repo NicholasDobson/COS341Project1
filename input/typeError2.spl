@@ -1,0 +1,20 @@
+// \/ Error Caught - Term boolean not numeric
+
+glob { }
+
+proc { }
+
+func {
+    compare ( x y ) {
+        local { res }
+        res = ( x eq y );
+        return res
+    }
+}
+
+main {
+    var { val }
+    val = compare ( 1 2 );
+    print val;
+    halt
+}

@@ -1,0 +1,17 @@
+glob { }
+proc { }
+func { }
+
+main {
+    var { i sum }
+    i = 1;
+    sum = 0;
+
+    while ( 5 > i ) {
+        sum = ( sum plus i );
+        i = ( i plus 1 )
+    };
+
+    print sum;
+    halt
+}

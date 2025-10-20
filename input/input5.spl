@@ -1,0 +1,36 @@
+glob {
+    g
+}
+proc {
+    greet ( name ) {
+        local { }
+        print "Hello";
+        print name
+    }
+}
+func {
+    add ( x y ) {
+        local { }
+        x = ( x plus y );
+        return x
+    }
+
+    multiply ( x y ) {
+        local { }
+        x = ( x mult y );
+        return x
+    }
+}
+main {
+    var { a b sum product }
+    a = 5;
+    b = 10;
+    greet ( a );
+    sum = add ( a b );
+    product = multiply ( a b );
+    print "Sum is ";
+    print sum;
+    print "Product is ";
+    print product;
+    halt
+}

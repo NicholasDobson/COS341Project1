@@ -1,0 +1,4 @@
+num = 7
+result = CALL double(num)
+PRINT result
+HALT

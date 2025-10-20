@@ -1,0 +1,14 @@
+// \/ Error Caught
+
+glob { }
+
+proc { }
+
+func { }
+
+main {
+    var { flag }
+    flag = ( 1 eq 2 );    // boolean
+    print flag;           // print expects numeric or string
+    halt
+}
