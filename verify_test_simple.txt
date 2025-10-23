@@ -1,0 +1,5 @@
+10 a = 10
+20 b = 20
+30 PRINT a
+40 PRINT b
+50 HALT

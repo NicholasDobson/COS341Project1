@@ -1,0 +1,26 @@
+10 num1 = 10
+20 num2 = 20
+30 x = num1
+40 y = num2
+50 total = CALL add(x, y)
+60 result = total
+70 CALL display(result)
+80 _t1 = total > 25
+90 IF NOT _t1 GOTO _L1
+100 PRINT "large result"
+110 GOTO _L2
+120 _L1:
+130 PRINT "small result"
+140 _L2:
+150 _L3:
+160 _t2 = num1 > 0
+170 IF NOT _t2 GOTO _L4
+180 PRINT num1
+190 _t3 = num1 - 1
+200 num1 = _t3
+210 GOTO _L3
+220 _L4:
+230 PRINT "done"
+240 PRINT 42
+250 PRINT result
+260 HALT

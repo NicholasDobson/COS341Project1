@@ -1,0 +1,6 @@
+10 x = 5
+20 y = 10
+30 result = 0
+40 CALL setresult(x)
+50 PRINT result
+60 HALT

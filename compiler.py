@@ -72,6 +72,10 @@ class SymbolTable:
         self.temp_counter = 0
         self.label_counter = 0
         
+        # Scope stack for proper scope management
+        self.scope_stack: List[Dict[str, Any]] = []
+        self.current_scope_type: Optional[ScopeType] = None
+        
     def get_node_id(self) -> int:
         self.node_counter += 1
         return self.node_counter
@@ -83,26 +87,270 @@ class SymbolTable:
     def new_label(self) -> str:
         self.label_counter += 1
         return f"_L{self.label_counter}"
+    
+    # ========================================================================
+    # SCOPE MANAGEMENT - Scope Stack Operations
+    # ========================================================================
+    
+    def push_scope(self, scope_type: ScopeType, name: str = "", context: Dict[str, Any] = None):
+        """
+        Push a new scope onto the scope stack.
         
+        Args:
+            scope_type: Type of scope (GLOBAL, LOCAL, MAIN, etc.)
+            name: Optional name for the scope (e.g., function/procedure name)
+            context: Optional additional context information
+        """
+        scope_info = {
+            'type': scope_type,
+            'name': name,
+            'symbols': [],  # List of node_ids in this scope
+            'parent': self.scope_stack[-1] if self.scope_stack else None,
+            'context': context or {}
+        }
+        self.scope_stack.append(scope_info)
+        self.current_scope_type = scope_type
+    
+    def pop_scope(self) -> Optional[Dict[str, Any]]:
+        """
+        Pop the current scope from the stack.
+        
+        Returns:
+            The popped scope information, or None if stack is empty
+        """
+        if not self.scope_stack:
+            return None
+        
+        popped = self.scope_stack.pop()
+        self.current_scope_type = self.scope_stack[-1]['type'] if self.scope_stack else None
+        return popped
+    
+    def current_scope(self) -> Optional[Dict[str, Any]]:
+        """Get the current scope without popping it."""
+        return self.scope_stack[-1] if self.scope_stack else None
+    
+    def get_current_scope_type(self) -> Optional[ScopeType]:
+        """Get the current scope type."""
+        return self.current_scope_type
+    
+    def scope_depth(self) -> int:
+        """Get the current scope stack depth."""
+        return len(self.scope_stack)
+    
+    def get_parent_scope(self) -> Optional[Dict[str, Any]]:
+        """Get the parent scope of the current scope."""
+        if len(self.scope_stack) >= 2:
+            return self.scope_stack[-2]
+        return None
+    
+    # ========================================================================
+    # CRUD OPERATIONS
+    # ========================================================================
+    
     def add_error(self, msg: str):
+        """Add an error message to the error list."""
         self.errors.append(f"ERROR: {msg}")
+    
+    def add_type_error(self, msg: str, line: int = 0):
+        """Add a formatted type error."""
+        if line:
+            self.errors.append(f"ERROR (Line {line}): TYPE-ERROR: {msg}")
+        else:
+            self.errors.append(f"ERROR: TYPE-ERROR: {msg}")
+    
+    def add_name_error(self, msg: str, line: int = 0):
+        """Add a formatted name-rule violation error."""
+        if line:
+            self.errors.append(f"ERROR (Line {line}): NAME-RULE-VIOLATION: {msg}")
+        else:
+            self.errors.append(f"ERROR: NAME-RULE-VIOLATION: {msg}")
         
     def add_warning(self, msg: str):
+        """Add a warning message to the warning list."""
         self.warnings.append(f"WARNING: {msg}")
+    
+    # CREATE
+    def add_symbol(self, symbol: SymbolInfo) -> bool:
+        """
+        Add a symbol to the symbol table.
         
-    def add_symbol(self, symbol: SymbolInfo):
+        Args:
+            symbol: The SymbolInfo object to add
+            
+        Returns:
+            True if successful, False if node_id already exists
+        """
+        if symbol.node_id in self.symbols:
+            self.add_warning(f"Attempted to add duplicate node_id {symbol.node_id}")
+            return False
+        
         self.symbols[symbol.node_id] = symbol
+        
+        # Update secondary index
         if symbol.name not in self.var_lookup:
             self.var_lookup[symbol.name] = []
         self.var_lookup[symbol.name].append(symbol)
         
-    def lookup_var(self, name: str, scope_context: ScopeType) -> Optional[SymbolInfo]:
-        """Lookup variable in current scope context"""
-        if name in self.var_lookup:
-            # Return the most recent one in scope
-            for sym in reversed(self.var_lookup[name]):
-                return sym
+        # Add to current scope if scope stack is active
+        if self.scope_stack:
+            self.scope_stack[-1]['symbols'].append(symbol.node_id)
+        
+        return True
+    
+    # READ
+    def get_symbol(self, node_id: int) -> Optional[SymbolInfo]:
+        """
+        Retrieve a symbol by its node_id.
+        
+        Args:
+            node_id: The unique identifier of the symbol
+            
+        Returns:
+            The SymbolInfo object, or None if not found
+        """
+        return self.symbols.get(node_id)
+    
+    def lookup_var(self, name: str, scope_context: ScopeType = None) -> Optional[SymbolInfo]:
+        """
+        Lookup variable by name with proper scope resolution.
+        
+        Args:
+            name: Variable name to lookup
+            scope_context: The scope context for resolution (None = use current)
+            
+        Returns:
+            The most appropriate SymbolInfo, or None if not found
+        """
+        if name not in self.var_lookup:
+            return None
+        
+        # If no scope context provided, use current scope
+        if scope_context is None:
+            scope_context = self.current_scope_type
+        
+        # If still no scope context, return most recent
+        if scope_context is None:
+            return self.var_lookup[name][-1] if self.var_lookup[name] else None
+        
+        # Search with scope resolution rules
+        for sym in reversed(self.var_lookup[name]):
+            if scope_context == ScopeType.LOCAL:
+                # In local scope: can see local vars, parameters, and global vars
+                if sym.is_local or sym.is_parameter or sym.is_global:
+                    return sym
+            elif scope_context == ScopeType.MAIN:
+                # In main scope: can see main vars and global vars
+                if sym.is_main_var or sym.is_global:
+                    return sym
+            elif scope_context == ScopeType.GLOBAL:
+                # In global scope: only global vars
+                if sym.is_global:
+                    return sym
+            elif scope_context == ScopeType.PROCEDURE or scope_context == ScopeType.FUNCTION:
+                # In procedure/function scope: same as local
+                if sym.is_local or sym.is_parameter or sym.is_global:
+                    return sym
+        
         return None
+    
+    def get_symbol_by_name(self, name: str, scope: ScopeType = None) -> Optional[SymbolInfo]:
+        """
+        Get symbol by name, optionally filtered by scope.
+        
+        Args:
+            name: Variable name
+            scope: Optional scope filter
+            
+        Returns:
+            First matching symbol, or None
+        """
+        if name not in self.var_lookup:
+            return None
+        
+        symbols = self.var_lookup[name]
+        if scope:
+            symbols = [s for s in symbols if s.scope == scope]
+        
+        return symbols[0] if symbols else None
+    
+    def get_all_symbols_in_scope(self, scope: ScopeType) -> List[SymbolInfo]:
+        """Get all symbols in a specific scope type."""
+        return [s for s in self.symbols.values() if s.scope == scope]
+    
+    # UPDATE
+    def update_symbol(self, node_id: int, **kwargs) -> bool:
+        """
+        Update symbol fields.
+        
+        Args:
+            node_id: The symbol's node_id
+            **kwargs: Field names and new values
+            
+        Returns:
+            True if successful, False if symbol not found
+        """
+        if node_id not in self.symbols:
+            return False
+        
+        symbol = self.symbols[node_id]
+        for field, value in kwargs.items():
+            if hasattr(symbol, field):
+                setattr(symbol, field, value)
+            else:
+                self.add_warning(f"Unknown field '{field}' in update_symbol")
+        
+        return True
+    
+    # DELETE
+    def delete_symbol(self, node_id: int) -> bool:
+        """
+        Delete a symbol and clean up all references.
+        
+        Args:
+            node_id: The symbol's unique identifier
+            
+        Returns:
+            True if successful, False if symbol not found
+        """
+        if node_id not in self.symbols:
+            return False
+        
+        symbol = self.symbols[node_id]
+        
+        # Remove from var_lookup
+        if symbol.name in self.var_lookup:
+            self.var_lookup[symbol.name] = [
+                s for s in self.var_lookup[symbol.name] 
+                if s.node_id != node_id
+            ]
+            # Clean up empty entries
+            if not self.var_lookup[symbol.name]:
+                del self.var_lookup[symbol.name]
+        
+        # Remove from scope stack if present
+        for scope in self.scope_stack:
+            if node_id in scope['symbols']:
+                scope['symbols'].remove(node_id)
+        
+        # Remove from symbols dict
+        del self.symbols[node_id]
+        return True
+    
+    # ========================================================================
+    # UTILITY METHODS
+    # ========================================================================
+    
+    def clear(self):
+        """Clear all symbol table data."""
+        self.symbols.clear()
+        self.var_lookup.clear()
+        self.functions.clear()
+        self.procedures.clear()
+        self.global_vars.clear()
+        self.errors.clear()
+        self.warnings.clear()
+        self.scope_stack.clear()
+        self.current_scope_type = None
         
     def has_errors(self) -> bool:
         return len(self.errors) > 0
@@ -1890,6 +2138,10 @@ class CodeGenerator:
         self.code: List[str] = []
         self.temp_counter = 0
         self.label_counter = 0
+        # Mapping from label name (e.g. L1, _L1, PROCname, start_label) to generated line numbers
+        self.label_lineno: Dict[str, int] = {}
+        # The final numbered output lines (strings with leading line numbers)
+        self.numbered_code: List[str] = []
         
     def generate(self) -> List[str]:
         """
@@ -1909,8 +2161,53 @@ class CodeGenerator:
         # Generate main program (only the ALGO part)
         if self.ast.main:
             self.generate_main_algo(self.ast.main)
-        
-        return self.code
+
+        # After generating raw instructions, assign consecutive line numbers
+        # (use increments of 10 by default) and build a mapping from labels
+        # to their corresponding line numbers.
+        self.numbered_code = self.number_instructions(increment=10, start=10)
+        return self.numbered_code
+
+    def number_instructions(self, increment: int = 10, start: int = 10) -> List[str]:
+        """
+        Assign line numbers to each instruction in self.code and return a
+        new list of strings with the line number prefixed. Also populate
+        self.label_lineno mapping for any label declarations found.
+
+        Detection heuristics for label declarations:
+        - Lines that start with 'REM <label>' (e.g. 'REM L1')
+        - Lines that end with ':' (e.g. 'L1:' or 'start:')
+        - 'PROC name:' and similar constructs will be captured by the colon rule
+        """
+        numbered: List[str] = []
+        self.label_lineno = {}
+        lineno = start
+
+        for instr in self.code:
+            # Trim-only for safe processing but preserve original spacing after number
+            instr_str = instr.strip()
+
+            # Detect labels declared via 'REM <label>'
+            if instr_str.startswith('REM '):
+                parts = instr_str.split()
+                if len(parts) >= 2:
+                    label = parts[1]
+                    self.label_lineno[label] = lineno
+
+            # Detect labels declared with trailing colon 'label:'
+            if instr_str.endswith(':'):
+                label = instr_str[:-1].strip()
+                # For lines like 'PROC name:' map 'PROC name' as label name
+                self.label_lineno[label] = lineno
+
+            numbered.append(f"{lineno} {instr}")
+            lineno += increment
+
+        return numbered
+
+    def get_label_mapping(self) -> Dict[str, int]:
+        """Return the mapping from label names to their assigned line numbers."""
+        return self.label_lineno
     
     def new_temp(self) -> str:
         """Generate a new temporary variable."""
