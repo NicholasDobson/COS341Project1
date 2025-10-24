@@ -1,0 +1,33 @@
+// Test file for line numbering and label mapping
+glob {
+    x
+}
+
+proc {
+}
+
+func {
+}
+
+main {
+    var {
+        a
+        b
+    }
+    
+    a = 10;
+    b = 5;
+    
+    if (> a b) {
+        print "a is greater";
+        a = (plus a 1)
+    } else {
+        print "b is greater or equal";
+        b = (plus b 1)
+    };
+    
+    print a;
+    print b;
+    
+    halt
+}
