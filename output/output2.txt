@@ -1,4 +1,12 @@
-num = 7
-result = CALL double(num)
-PRINT result
-HALT
+1: GOTO 7
+2: doublex = argdouble1
+3: t1 = doublex * 2
+4: doublex = t1
+5: retdouble = doublex
+6: RETURN
+7: num = 7
+8: argdouble1 = num
+9: GOSUB 2
+10: result = retdouble
+11: PRINT result
+12: STOP

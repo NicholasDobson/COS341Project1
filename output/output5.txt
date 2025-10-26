@@ -1,10 +1,34 @@
-a = 5
-b = 10
-CALL greet(a)
-sum = CALL add(a, b)
-product = CALL multiply(a, b)
-PRINT "Sum is "
-PRINT sum
-PRINT "Product is "
-PRINT product
-HALT
+1: GOTO 18
+2: welcname = argwelc1
+3: PRINT "Hello"
+4: PRINT welcname
+5: RETURN
+6: addx = argadd1
+7: addy = argadd2
+8: t1 = addx + addy
+9: addx = t1
+10: retadd = addx
+11: RETURN
+12: multiplyx = argmultiply1
+13: multiplyy = argmultiply2
+14: t2 = multiplyx * multiplyy
+15: multiplyx = t2
+16: retmultiply = multiplyx
+17: RETURN
+18: a = 5
+19: b = 10
+20: argwelc1 = a
+21: GOSUB 2
+22: argadd1 = a
+23: argadd2 = b
+24: GOSUB 6
+25: sum = retadd
+26: argmultiply1 = a
+27: argmultiply2 = b
+28: GOSUB 12
+29: product = retmultiply
+30: PRINT "Sum is "
+31: PRINT sum
+32: PRINT "Product is "
+33: PRINT product
+34: STOP

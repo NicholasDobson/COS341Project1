@@ -2,7 +2,7 @@ glob {
     g
 }
 proc {
-    greet ( name ) {
+    welc ( name ) {
         local { }
         print "Hello";
         print name
@@ -25,7 +25,7 @@ main {
     var { a b sum product }
     a = 5;
     b = 10;
-    greet ( a );
+    welc ( a );
     sum = add ( a b );
     product = multiply ( a b );
     print "Sum is ";
