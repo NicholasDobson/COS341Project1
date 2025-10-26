@@ -1,0 +1,1100 @@
+
+======================================================================
+TEST: TEST 1: Simple IF-THEN with Labels
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                x
+            }
+            x = 10;
+            if (x > 5) {
+                print x
+            }
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: x = 10
+  2: _t1 = x > 5
+  3: IF NOT _t1 GOTO _L1
+  4: PRINT x
+  5: _L1:
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+  _L1 -> Line 5
+
+--- FINAL CODE (After Label Processing) ---
+  1: x = 10
+  2: _t1 = x > 5
+  3: IF NOT _t1 GOTO 5
+  4: PRINT x
+  5: REM _L1
+
+✓ No unresolved labels found
+✓ Line 3 - GOTO 5 (valid)
+
+✅ TEST PASSED: TEST 1: Simple IF-THEN with Labels
+
+======================================================================
+TEST: TEST 2: IF-THEN-ELSE with Labels
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                x
+                y
+            }
+            x = 10;
+            if (x > 5) {
+                y = 1
+            } else {
+                y = 0
+            };
+            print y
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+x is TermNode
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: x = 10
+  2: _t1 = x > 5
+  3: IF NOT _t1 GOTO _L1
+  4: y = 1
+  5: GOTO _L2
+  6: _L1:
+  7: y = 0
+  8: _L2:
+  9: PRINT y
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+  _L1 -> Line 6
+  _L2 -> Line 8
+
+--- FINAL CODE (After Label Processing) ---
+  1: x = 10
+  2: _t1 = x > 5
+  3: IF NOT _t1 GOTO 6
+  4: y = 1
+  5: GOTO 8
+  6: REM _L1
+  7: y = 0
+  8: REM _L2
+  9: PRINT y
+
+✓ No unresolved labels found
+✓ Line 3 - GOTO 6 (valid)
+✓ Line 5 - GOTO 8 (valid)
+
+✅ TEST PASSED: TEST 2: IF-THEN-ELSE with Labels
+
+======================================================================
+TEST: TEST 3: While Loop with Labels
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                counter
+            }
+            counter = 0;
+            while (counter > 10) {
+                counter = (counter plus 1);
+                print counter
+            }
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: counter = 0
+  2: _L1:
+  3: _t1 = counter > 10
+  4: IF NOT _t1 GOTO _L2
+  5: _t2 = counter + 1
+  6: counter = _t2
+  7: PRINT counter
+  8: GOTO _L1
+  9: _L2:
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+  _L1 -> Line 2
+  _L2 -> Line 9
+
+--- FINAL CODE (After Label Processing) ---
+  1: counter = 0
+  2: REM _L1
+  3: _t1 = counter > 10
+  4: IF NOT _t1 GOTO 9
+  5: _t2 = counter + 1
+  6: counter = _t2
+  7: PRINT counter
+  8: GOTO 2
+  9: REM _L2
+
+✓ No unresolved labels found
+✓ Line 4 - GOTO 9 (valid)
+✓ Line 8 - GOTO 2 (valid)
+
+✅ TEST PASSED: TEST 3: While Loop with Labels
+
+======================================================================
+TEST: TEST 4: Do-Until Loop with Labels
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                i
+            }
+            i = 0;
+            do {
+                i = (i plus 1);
+                print i
+            } until (i > 10)
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: i = 0
+  2: _L1:
+  3: _t1 = i + 1
+  4: i = _t1
+  5: PRINT i
+  6: _t2 = i > 10
+  7: IF NOT _t2 GOTO _L1
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+  _L1 -> Line 2
+
+--- FINAL CODE (After Label Processing) ---
+  1: i = 0
+  2: REM _L1
+  3: _t1 = i + 1
+  4: i = _t1
+  5: PRINT i
+  6: _t2 = i > 10
+  7: IF NOT _t2 GOTO 2
+
+✓ No unresolved labels found
+✓ Line 7 - GOTO 2 (valid)
+
+✅ TEST PASSED: TEST 4: Do-Until Loop with Labels
+
+======================================================================
+TEST: TEST 5: Nested IF Statements
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                x
+                y
+            }
+            x = 10;
+            y = 5;
+            if (x > 0) {
+                if (y > 0) {
+                    print 1
+                } else {
+                    print 0
+                }
+            } else {
+                print 2
+            }
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: x = 10
+  2: y = 5
+  3: _t1 = x > 0
+  4: IF NOT _t1 GOTO _L1
+  5: _t2 = y > 0
+  6: IF NOT _t2 GOTO _L3
+  7: PRINT 1
+  8: GOTO _L4
+  9: _L3:
+ 10: PRINT 0
+ 11: _L4:
+ 12: GOTO _L2
+ 13: _L1:
+ 14: PRINT 2
+ 15: _L2:
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+  _L3 -> Line 9
+  _L4 -> Line 11
+  _L1 -> Line 13
+  _L2 -> Line 15
+
+--- FINAL CODE (After Label Processing) ---
+  1: x = 10
+  2: y = 5
+  3: _t1 = x > 0
+  4: IF NOT _t1 GOTO 13
+  5: _t2 = y > 0
+  6: IF NOT _t2 GOTO 9
+  7: PRINT 1
+  8: GOTO 11
+  9: REM _L3
+ 10: PRINT 0
+ 11: REM _L4
+ 12: GOTO 15
+ 13: REM _L1
+ 14: PRINT 2
+ 15: REM _L2
+
+✓ No unresolved labels found
+✓ Line 4 - GOTO 13 (valid)
+✓ Line 6 - GOTO 9 (valid)
+✓ Line 8 - GOTO 11 (valid)
+✓ Line 12 - GOTO 15 (valid)
+
+✅ TEST PASSED: TEST 5: Nested IF Statements
+
+======================================================================
+TEST: TEST 6: Loop Inside IF
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                x
+                i
+            }
+            x = 10;
+            if (x > 5) {
+                i = 0;
+                while (i > 5) {
+                    print i;
+                    i = (i plus 1)
+                }
+            }
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+x is TermNode
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: x = 10
+  2: _t1 = x > 5
+  3: IF NOT _t1 GOTO _L1
+  4: i = 0
+  5: _L3:
+  6: _t2 = i > 5
+  7: IF NOT _t2 GOTO _L4
+  8: PRINT i
+  9: _t3 = i + 1
+ 10: i = _t3
+ 11: GOTO _L3
+ 12: _L4:
+ 13: _L1:
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+  _L3 -> Line 5
+  _L4 -> Line 12
+  _L1 -> Line 13
+
+--- FINAL CODE (After Label Processing) ---
+  1: x = 10
+  2: _t1 = x > 5
+  3: IF NOT _t1 GOTO 13
+  4: i = 0
+  5: REM _L3
+  6: _t2 = i > 5
+  7: IF NOT _t2 GOTO 12
+  8: PRINT i
+  9: _t3 = i + 1
+ 10: i = _t3
+ 11: GOTO 5
+ 12: REM _L4
+ 13: REM _L1
+
+✓ No unresolved labels found
+✓ Line 3 - GOTO 13 (valid)
+✓ Line 7 - GOTO 12 (valid)
+✓ Line 11 - GOTO 5 (valid)
+
+✅ TEST PASSED: TEST 6: Loop Inside IF
+
+======================================================================
+TEST: TEST 7: Multiple Sequential IFs
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                a
+                b
+                c
+            }
+            a = 1;
+            b = 2;
+            c = 3;
+            if (a > 0) {
+                print a
+            };
+            if (b > 0) {
+                print b
+            };
+            if (c > 0) {
+                print c
+            }
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+x is TermNode
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: a = 1
+  2: b = 2
+  3: c = 3
+  4: _t1 = a > 0
+  5: IF NOT _t1 GOTO _L1
+  6: PRINT a
+  7: _L1:
+  8: _t2 = b > 0
+  9: IF NOT _t2 GOTO _L3
+ 10: PRINT b
+ 11: _L3:
+ 12: _t3 = c > 0
+ 13: IF NOT _t3 GOTO _L5
+ 14: PRINT c
+ 15: _L5:
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+  _L1 -> Line 7
+  _L3 -> Line 11
+  _L5 -> Line 15
+
+--- FINAL CODE (After Label Processing) ---
+  1: a = 1
+  2: b = 2
+  3: c = 3
+  4: _t1 = a > 0
+  5: IF NOT _t1 GOTO 7
+  6: PRINT a
+  7: REM _L1
+  8: _t2 = b > 0
+  9: IF NOT _t2 GOTO 11
+ 10: PRINT b
+ 11: REM _L3
+ 12: _t3 = c > 0
+ 13: IF NOT _t3 GOTO 15
+ 14: PRINT c
+ 15: REM _L5
+
+✓ No unresolved labels found
+✓ Line 5 - GOTO 7 (valid)
+✓ Line 9 - GOTO 11 (valid)
+✓ Line 13 - GOTO 15 (valid)
+
+✅ TEST PASSED: TEST 7: Multiple Sequential IFs
+
+======================================================================
+TEST: TEST 8: Complex Control Flow
+======================================================================
+SPL Code:
+
+        glob {
+            globalflag
+        }
+        proc {}
+        func {}
+        main {
+            var {
+                x
+                i
+            }
+            globalflag = 1;
+            x = 0;
+            while (x > 10) {
+                if (globalflag eq 1) {
+                    i = 0;
+                    do {
+                        i = (i plus 1);
+                        if (i > 5) {
+                            print i
+                        }
+                    } until (i > 3)
+                };
+                x = (x plus 1)
+            }
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+x is TermNode
+x is TermNode
+x is TermNode
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: globalflag = 1
+  2: x = 0
+  3: _L1:
+  4: _t1 = x > 10
+  5: IF NOT _t1 GOTO _L2
+  6: _t2 = globalflag == 1
+  7: IF NOT _t2 GOTO _L3
+  8: i = 0
+  9: _L5:
+ 10: _t3 = i + 1
+ 11: i = _t3
+ 12: _t4 = i > 5
+ 13: IF NOT _t4 GOTO _L6
+ 14: PRINT i
+ 15: _L6:
+ 16: _t5 = i > 3
+ 17: IF NOT _t5 GOTO _L5
+ 18: _L3:
+ 19: _t6 = x + 1
+ 20: x = _t6
+ 21: GOTO _L1
+ 22: _L2:
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+  _L1 -> Line 3
+  _L5 -> Line 9
+  _L6 -> Line 15
+  _L3 -> Line 18
+  _L2 -> Line 22
+
+--- FINAL CODE (After Label Processing) ---
+  1: globalflag = 1
+  2: x = 0
+  3: REM _L1
+  4: _t1 = x > 10
+  5: IF NOT _t1 GOTO 22
+  6: _t2 = globalflag == 1
+  7: IF NOT _t2 GOTO 18
+  8: i = 0
+  9: REM _L5
+ 10: _t3 = i + 1
+ 11: i = _t3
+ 12: _t4 = i > 5
+ 13: IF NOT _t4 GOTO 15
+ 14: PRINT i
+ 15: REM _L6
+ 16: _t5 = i > 3
+ 17: IF NOT _t5 GOTO 9
+ 18: REM _L3
+ 19: _t6 = x + 1
+ 20: x = _t6
+ 21: GOTO 3
+ 22: REM _L2
+
+✓ No unresolved labels found
+✓ Line 5 - GOTO 22 (valid)
+✓ Line 7 - GOTO 18 (valid)
+✓ Line 13 - GOTO 15 (valid)
+✓ Line 17 - GOTO 9 (valid)
+✓ Line 21 - GOTO 3 (valid)
+
+✅ TEST PASSED: TEST 8: Complex Control Flow
+
+======================================================================
+TEST: TEST 9: Boolean Expressions with Labels
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                a
+                b
+            }
+            a = 10;
+            b = 5;
+            if ((a > 5) and (b > 0)) {
+                print 1
+            } else {
+                print 0
+            }
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: a = 10
+  2: b = 5
+  3: _t1 = a > 5
+  4: _t2 = b > 0
+  5: _t3 = _t1 && _t2
+  6: IF NOT _t3 GOTO _L1
+  7: PRINT 1
+  8: GOTO _L2
+  9: _L1:
+ 10: PRINT 0
+ 11: _L2:
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+  _L1 -> Line 9
+  _L2 -> Line 11
+
+--- FINAL CODE (After Label Processing) ---
+  1: a = 10
+  2: b = 5
+  3: _t1 = a > 5
+  4: _t2 = b > 0
+  5: _t3 = _t1 && _t2
+  6: IF NOT _t3 GOTO 9
+  7: PRINT 1
+  8: GOTO 11
+  9: REM _L1
+ 10: PRINT 0
+ 11: REM _L2
+
+✓ No unresolved labels found
+✓ Line 6 - GOTO 9 (valid)
+✓ Line 8 - GOTO 11 (valid)
+
+✅ TEST PASSED: TEST 9: Boolean Expressions with Labels
+
+======================================================================
+TEST: TEST 10: NOT Expression with Branch
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                flag
+            }
+            flag = 0;
+            if (not flag) {
+                print 1
+            } else {
+                print 0
+            }
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: flag = 0
+  2: _t1 = NOT flag
+  3: IF NOT _t1 GOTO _L1
+  4: PRINT 1
+  5: GOTO _L2
+  6: _L1:
+  7: PRINT 0
+  8: _L2:
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+  _L1 -> Line 6
+  _L2 -> Line 8
+
+--- FINAL CODE (After Label Processing) ---
+  1: flag = 0
+  2: _t1 = NOT flag
+  3: IF NOT _t1 GOTO 6
+  4: PRINT 1
+  5: GOTO 8
+  6: REM _L1
+  7: PRINT 0
+  8: REM _L2
+
+✓ No unresolved labels found
+✓ Line 3 - GOTO 6 (valid)
+✓ Line 5 - GOTO 8 (valid)
+
+✅ TEST PASSED: TEST 10: NOT Expression with Branch
+
+======================================================================
+TEST: TEST 11: Procedure with Branches
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {
+            checkvalue(x) {
+                local {}
+                if (x > 10) {
+                    print 1
+                } else {
+                    print 0
+                }
+            }
+        }
+        func {}
+        main {
+            var {
+                val
+            }
+            val = 15;
+            checkvalue(val)
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: val = 15
+  2: CALL checkvalue(val)
+⚠️  WARNING: Expected labels in intermediate code but found none
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+
+--- FINAL CODE (After Label Processing) ---
+  1: val = 15
+  2: CALL checkvalue(val)
+
+✓ No unresolved labels found
+
+✅ TEST PASSED: TEST 11: Procedure with Branches
+
+======================================================================
+TEST: TEST 12: Function with Loop
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {
+            sumto(n) {
+                local {
+                    sum
+                    i
+                }
+                sum = 0;
+                i = 1;
+                while (i > n) {
+                    sum = (sum plus i);
+                    i = (i plus 1)
+                };
+                return sum
+            }
+        }
+        main {
+            var {
+                result
+            }
+            result = sumto(10);
+            print result
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+x is TermNode
+x is TermNode
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: result = CALL sumto(10)
+  2: PRINT result
+⚠️  WARNING: Expected labels in intermediate code but found none
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+
+--- FINAL CODE (After Label Processing) ---
+  1: result = CALL sumto(10)
+  2: PRINT result
+
+✓ No unresolved labels found
+
+✅ TEST PASSED: TEST 12: Function with Loop
+
+======================================================================
+TEST: TEST 13: No Control Flow (No Labels Expected)
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                x
+                y
+            }
+            x = 10;
+            y = 20;
+            print x;
+            print y;
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: x = 10
+  2: y = 20
+  3: PRINT x
+  4: PRINT y
+  5: HALT
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+
+--- FINAL CODE (After Label Processing) ---
+  1: x = 10
+  2: y = 20
+  3: PRINT x
+  4: PRINT y
+  5: HALT
+
+✓ No unresolved labels found
+
+✅ TEST PASSED: TEST 13: No Control Flow (No Labels Expected)
+
+======================================================================
+TEST: TEST 14: Multiple Loops
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                i
+                j
+            }
+            i = 0;
+            while (i > 5) {
+                print i;
+                i = (i plus 1)
+            };
+            j = 0;
+            do {
+                print j;
+                j = (j plus 1)
+            } until (j > 5)
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+x is TermNode
+x is TermNode
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: i = 0
+  2: _L1:
+  3: _t1 = i > 5
+  4: IF NOT _t1 GOTO _L2
+  5: PRINT i
+  6: _t2 = i + 1
+  7: i = _t2
+  8: GOTO _L1
+  9: _L2:
+ 10: j = 0
+ 11: _L3:
+ 12: PRINT j
+ 13: _t3 = j + 1
+ 14: j = _t3
+ 15: _t4 = j > 5
+ 16: IF NOT _t4 GOTO _L3
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+  _L1 -> Line 2
+  _L2 -> Line 9
+  _L3 -> Line 11
+
+--- FINAL CODE (After Label Processing) ---
+  1: i = 0
+  2: REM _L1
+  3: _t1 = i > 5
+  4: IF NOT _t1 GOTO 9
+  5: PRINT i
+  6: _t2 = i + 1
+  7: i = _t2
+  8: GOTO 2
+  9: REM _L2
+ 10: j = 0
+ 11: REM _L3
+ 12: PRINT j
+ 13: _t3 = j + 1
+ 14: j = _t3
+ 15: _t4 = j > 5
+ 16: IF NOT _t4 GOTO 11
+
+✓ No unresolved labels found
+✓ Line 4 - GOTO 9 (valid)
+✓ Line 8 - GOTO 2 (valid)
+✓ Line 16 - GOTO 11 (valid)
+
+✅ TEST PASSED: TEST 14: Multiple Loops
+
+======================================================================
+TEST: TEST 15: Deep Nesting
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                a
+                b
+                c
+            }
+            a = 1;
+            b = 2;
+            c = 3;
+            if (a > 0) {
+                if (b > 0) {
+                    if (c > 0) {
+                        print 1
+                    } else {
+                        print 2
+                    }
+                } else {
+                    print 3
+                }
+            } else {
+                print 4
+            }
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+x is TermNode
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+--- INTERMEDIATE CODE (Before Label Processing) ---
+  1: a = 1
+  2: b = 2
+  3: c = 3
+  4: _t1 = a > 0
+  5: IF NOT _t1 GOTO _L1
+  6: _t2 = b > 0
+  7: IF NOT _t2 GOTO _L3
+  8: _t3 = c > 0
+  9: IF NOT _t3 GOTO _L5
+ 10: PRINT 1
+ 11: GOTO _L6
+ 12: _L5:
+ 13: PRINT 2
+ 14: _L6:
+ 15: GOTO _L4
+ 16: _L3:
+ 17: PRINT 3
+ 18: _L4:
+ 19: GOTO _L2
+ 20: _L1:
+ 21: PRINT 4
+ 22: _L2:
+
+--- PROCESSING LABELS AND JUMPS ---
+
+Label Mapping:
+  _L5 -> Line 12
+  _L6 -> Line 14
+  _L3 -> Line 16
+  _L4 -> Line 18
+  _L1 -> Line 20
+  _L2 -> Line 22
+
+--- FINAL CODE (After Label Processing) ---
+  1: a = 1
+  2: b = 2
+  3: c = 3
+  4: _t1 = a > 0
+  5: IF NOT _t1 GOTO 20
+  6: _t2 = b > 0
+  7: IF NOT _t2 GOTO 16
+  8: _t3 = c > 0
+  9: IF NOT _t3 GOTO 12
+ 10: PRINT 1
+ 11: GOTO 14
+ 12: REM _L5
+ 13: PRINT 2
+ 14: REM _L6
+ 15: GOTO 18
+ 16: REM _L3
+ 17: PRINT 3
+ 18: REM _L4
+ 19: GOTO 22
+ 20: REM _L1
+ 21: PRINT 4
+ 22: REM _L2
+
+✓ No unresolved labels found
+✓ Line 5 - GOTO 20 (valid)
+✓ Line 7 - GOTO 16 (valid)
+✓ Line 9 - GOTO 12 (valid)
+✓ Line 11 - GOTO 14 (valid)
+✓ Line 15 - GOTO 18 (valid)
+✓ Line 19 - GOTO 22 (valid)
+
+✅ TEST PASSED: TEST 15: Deep Nesting
+
+======================================================================
+TEST SUMMARY
+======================================================================
+✅ TEST 1: Simple IF-THEN with Labels: PASSED
+✅ TEST 2: IF-THEN-ELSE with Labels: PASSED
+✅ TEST 3: While Loop with Labels: PASSED
+✅ TEST 4: Do-Until Loop with Labels: PASSED
+✅ TEST 5: Nested IF Statements: PASSED
+✅ TEST 6: Loop Inside IF: PASSED
+✅ TEST 7: Multiple Sequential IFs: PASSED
+✅ TEST 8: Complex Control Flow: PASSED
+✅ TEST 9: Boolean Expressions with Labels: PASSED
+✅ TEST 10: NOT Expression with Branch: PASSED
+✅ TEST 11: Procedure with Branches: PASSED
+✅ TEST 12: Function with Loop: PASSED
+✅ TEST 13: No Control Flow (No Labels Expected): PASSED
+✅ TEST 14: Multiple Loops: PASSED
+✅ TEST 15: Deep Nesting: PASSED
+----------------------------------------------------------------------
+Total Tests: 15
+Passed: 15
+Failed: 0
+Success Rate: 100.0%
+======================================================================

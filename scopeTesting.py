@@ -21,6 +21,7 @@ import sys
 import os
 from pathlib import Path
 
+# Add parent directory to path to import compiler
 sys.path.insert(0, str(Path(__file__).parent))
 
 from compiler import (
@@ -231,7 +232,7 @@ def main():
                     temp
                     result
                 }
-                temp = a plus 1;
+                temp = (a plus 1);
                 print temp
             }
         }
@@ -283,7 +284,7 @@ def main():
                 local {
                     result
                 }
-                result = x plus y;
+                result = (x plus y);
                 return result
             }
         }
@@ -339,7 +340,7 @@ def main():
             }
             x = 10;
             y = 20;
-            z = x plus y;
+            z = (x plus y);
             print z
         }
         """,
@@ -400,17 +401,17 @@ def main():
         "TEST 11: Global Variable Access from Main",
         """
         glob {
-            globalVar
+            globalvar
         }
         proc {}
         func {}
         main {
             var {
-                localVar
+                localvar
             }
-            globalVar = 100;
-            localVar = globalVar plus 50;
-            print localVar
+            globalvar = 100;
+            localvar = (globalvar plus 50);
+            print localvar
         }
         """,
         should_pass=True
@@ -428,7 +429,7 @@ def main():
         proc {
             increment() {
                 local {}
-                counter = counter plus 1
+                counter = (counter plus 1)
             }
         }
         func {}
@@ -453,11 +454,11 @@ def main():
         }
         proc {}
         func {
-            addToBase(x) {
+            addtobase(x) {
                 local {
                     result
                 }
-                result = base plus x;
+                result = (base plus x);
                 return result
             }
         }
@@ -466,7 +467,7 @@ def main():
                 answer
             }
             base = 100;
-            answer = addToBase(50);
+            answer = addtobase(50);
             print answer
         }
         """,
@@ -825,38 +826,38 @@ def main():
         "TEST 27: Complex Scope Hierarchy",
         """
         glob {
-            globalX
-            globalY
+            globalx
+            globaly
         }
         proc {
-            procA(paramA) {
+            proca(parama) {
                 local {
-                    localA
+                    locala
                 }
-                localA = paramA plus globalX;
-                globalY = localA
+                locala = (parama plus globalx);
+                globaly = locala
             }
         }
         func {
-            funcB(paramB) {
+            funcb(paramb) {
                 local {
-                    localB
+                    localb
                 }
-                localB = paramB mult globalX;
-                return localB
+                localb = (paramb mult globalx);
+                return localb
             }
         }
         main {
             var {
-                mainX
-                mainY
+                mainx
+                mainy
             }
-            globalX = 10;
-            globalY = 20;
-            mainX = 5;
-            procA(mainX);
-            mainY = funcB(mainX);
-            print mainY
+            globalx = 10;
+            globaly = 20;
+            mainx = 5;
+            proca(mainx);
+            mainy = funcb(mainx);
+            print mainy
         }
         """,
         should_pass=True
@@ -921,15 +922,17 @@ def main():
         func {}
         main {
             var {}
-            undeclaredProc()
+            undeclaredproc()
         }
         """,
         should_pass=False,
         expected_errors=["undeclared"]
     )
     
+    # Print final summary
     runner.print_summary()
     
+    # Return exit code
     return 0 if runner.tests_failed == 0 else 1
 
 

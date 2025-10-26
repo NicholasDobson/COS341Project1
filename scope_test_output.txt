@@ -1,0 +1,1317 @@
+
+======================================================================
+TEST: TEST 1: Simple Global Variables
+======================================================================
+SPL Code:
+
+        glob {
+            x
+            y
+            z
+        }
+        proc {}
+        func {}
+        main {
+            var {}
+            x = 5
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: {'z', 'y', 'x'}
+Procedure Names: set()
+Function Names: set()
+
+Symbol Table Entries:
+  Node 7: x [global] (global)
+  Node 8: y [global] (global)
+  Node 9: z [global] (global)
+  Node 10: x [global] (global)
+=== END SYMBOL TABLE REPORT ===
+
+
+=== SUCCESS: No errors found ===
+✓ Symbol 'x' has expected scope: ScopeType.GLOBAL
+✓ Symbol 'y' has expected scope: ScopeType.GLOBAL
+✓ Symbol 'z' has expected scope: ScopeType.GLOBAL
+
+✅ TEST PASSED: TEST 1: Simple Global Variables
+
+======================================================================
+TEST: TEST 2: Global Variable Double Declaration
+======================================================================
+SPL Code:
+
+        glob {
+            x
+            y
+            x
+        }
+        proc {}
+        func {}
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: {'y', 'x'}
+Procedure Names: set()
+Function Names: set()
+
+Symbol Table Entries:
+  Node 5: x [global] (global)
+  Node 6: y [global] (global)
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: NAME-RULE-VIOLATION: double-declaration: Duplicate global variable declaration: 'x'
+
+✅ TEST PASSED: TEST 2: Global Variable Double Declaration
+
+======================================================================
+TEST: TEST 3: Procedure with Parameters
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {
+            myproc(a b c) {
+                local {}
+                print a
+            }
+        }
+        func {}
+        main {
+            var {}
+            myproc(1 2 3)
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: {'myproc'}
+Function Names: set()
+
+Symbol Table Entries:
+  Node 12: a [local] (param) in myproc
+  Node 13: b [local] (param) in myproc
+  Node 14: c [local] (param) in myproc
+  Node 15: a [local] (param) in myproc
+=== END SYMBOL TABLE REPORT ===
+
+
+=== SUCCESS: No errors found ===
+
+✅ TEST PASSED: TEST 3: Procedure with Parameters
+
+======================================================================
+TEST: TEST 4: Procedure with Local Variables
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {
+            myproc(a) {
+                local {
+                    temp
+                    result
+                }
+                temp = (a plus 1);
+                print temp
+            }
+        }
+        func {}
+        main {
+            var {}
+            myproc(5)
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: {'myproc'}
+Function Names: set()
+
+Symbol Table Entries:
+  Node 16: a [local] (param) in myproc
+  Node 17: temp [local] (local) in myproc
+  Node 18: result [local] (local) in myproc
+  Node 19: temp [local] (local) in myproc
+  Node 20: a [local] (param) in myproc
+  Node 21: temp [local] (local) in myproc
+=== END SYMBOL TABLE REPORT ===
+
+
+=== SUCCESS: No errors found ===
+
+✅ TEST PASSED: TEST 4: Procedure with Local Variables
+
+======================================================================
+TEST: TEST 5: Parameter Shadowing by Local Variable
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {
+            myproc(a b) {
+                local {
+                    a
+                    temp
+                }
+                print a
+            }
+        }
+        func {}
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: {'myproc'}
+Function Names: set()
+
+Symbol Table Entries:
+  Node 9: a [local] (param) in myproc
+  Node 10: b [local] (param) in myproc
+  Node 11: temp [local] (local) in myproc
+  Node 12: a [local] (param) in myproc
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: NAME-RULE-VIOLATION: shadowing: Local variable 'a' shadows parameter in procedure 'myproc'
+
+✅ TEST PASSED: TEST 5: Parameter Shadowing by Local Variable
+
+======================================================================
+TEST: TEST 6: Function with Return
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {
+            compute(x y) {
+                local {
+                    result
+                }
+                result = (x plus y);
+                return result
+            }
+        }
+        main {
+            var {
+                answer
+            }
+            answer = compute(5 10)
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: set()
+Function Names: {'compute'}
+
+Symbol Table Entries:
+  Node 16: x [local] (param) in compute
+  Node 17: y [local] (param) in compute
+  Node 18: result [local] (local) in compute
+  Node 19: result [local] (local) in compute
+  Node 20: x [local] (param) in compute
+  Node 21: y [local] (param) in compute
+  Node 22: result [local] (local) in compute
+  Node 23: answer [main] (main)
+  Node 24: answer [main] (main)
+=== END SYMBOL TABLE REPORT ===
+
+
+=== SUCCESS: No errors found ===
+
+✅ TEST PASSED: TEST 6: Function with Return
+
+======================================================================
+TEST: TEST 7: Function Parameter Shadowing
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {
+            compute(x y) {
+                local {
+                    x
+                }
+                return x
+            }
+        }
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: set()
+Function Names: {'compute'}
+
+Symbol Table Entries:
+  Node 8: x [local] (param) in compute
+  Node 9: y [local] (param) in compute
+  Node 10: x [local] (param) in compute
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: NAME-RULE-VIOLATION: shadowing: Local variable 'x' shadows parameter in function 'compute'
+
+✅ TEST PASSED: TEST 7: Function Parameter Shadowing
+
+======================================================================
+TEST: TEST 8: Main Local Variables
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                x
+                y
+                z
+            }
+            x = 10;
+            y = 20;
+            z = (x plus y);
+            print z
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: set()
+Function Names: set()
+
+Symbol Table Entries:
+  Node 18: x [main] (main)
+  Node 19: y [main] (main)
+  Node 20: z [main] (main)
+  Node 21: x [main] (main)
+  Node 22: y [main] (main)
+  Node 23: z [main] (main)
+  Node 24: x [main] (main)
+  Node 25: y [main] (main)
+  Node 26: z [main] (main)
+=== END SYMBOL TABLE REPORT ===
+
+
+=== SUCCESS: No errors found ===
+✓ Symbol 'x' has expected scope: ScopeType.MAIN
+✓ Symbol 'y' has expected scope: ScopeType.MAIN
+✓ Symbol 'z' has expected scope: ScopeType.MAIN
+
+✅ TEST PASSED: TEST 8: Main Local Variables
+
+======================================================================
+TEST: TEST 9: Main Variable Double Declaration
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                x
+                y
+                x
+            }
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: set()
+Function Names: set()
+
+Symbol Table Entries:
+  Node 5: x [main] (main)
+  Node 6: y [main] (main)
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: NAME-RULE-VIOLATION: double-declaration: Duplicate variable declaration in main: 'x'
+
+✅ TEST PASSED: TEST 9: Main Variable Double Declaration
+
+======================================================================
+TEST: TEST 10: Undeclared Variable in Main
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {
+                x
+            }
+            y = 10
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: set()
+Function Names: set()
+
+Symbol Table Entries:
+  Node 7: x [main] (main)
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: undeclared: UNDECLARED-VARIABLE: 'y' in main
+
+✅ TEST PASSED: TEST 10: Undeclared Variable in Main
+
+======================================================================
+TEST: TEST 11: Global Variable Access from Main
+======================================================================
+SPL Code:
+
+        glob {
+            globalvar
+        }
+        proc {}
+        func {}
+        main {
+            var {
+                localvar
+            }
+            globalvar = 100;
+            localvar = (globalvar plus 50);
+            print localvar
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: {'globalvar'}
+Procedure Names: set()
+Function Names: set()
+
+Symbol Table Entries:
+  Node 15: globalvar [global] (global)
+  Node 16: localvar [main] (main)
+  Node 17: globalvar [global] (global)
+  Node 18: localvar [main] (main)
+  Node 19: globalvar [global] (global)
+  Node 20: localvar [main] (main)
+=== END SYMBOL TABLE REPORT ===
+
+
+=== SUCCESS: No errors found ===
+
+✅ TEST PASSED: TEST 11: Global Variable Access from Main
+
+======================================================================
+TEST: TEST 12: Global Variable Access from Procedure
+======================================================================
+SPL Code:
+
+        glob {
+            counter
+        }
+        proc {
+            increment() {
+                local {}
+                counter = (counter plus 1)
+            }
+        }
+        func {}
+        main {
+            var {}
+            counter = 0;
+            increment();
+            print counter
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: {'counter'}
+Procedure Names: {'increment'}
+Function Names: set()
+
+Symbol Table Entries:
+  Node 18: counter [global] (global)
+  Node 19: counter [global] (global)
+  Node 20: counter [global] (global)
+  Node 21: counter [global] (global)
+  Node 22: counter [global] (global)
+=== END SYMBOL TABLE REPORT ===
+
+
+=== SUCCESS: No errors found ===
+
+✅ TEST PASSED: TEST 12: Global Variable Access from Procedure
+
+======================================================================
+TEST: TEST 13: Global Variable Access from Function
+======================================================================
+SPL Code:
+
+        glob {
+            base
+        }
+        proc {}
+        func {
+            addtobase(x) {
+                local {
+                    result
+                }
+                result = (base plus x);
+                return result
+            }
+        }
+        main {
+            var {
+                answer
+            }
+            base = 100;
+            answer = addtobase(50);
+            print answer
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: {'base'}
+Procedure Names: set()
+Function Names: {'addtobase'}
+
+Symbol Table Entries:
+  Node 20: base [global] (global)
+  Node 21: x [local] (param) in addtobase
+  Node 22: result [local] (local) in addtobase
+  Node 23: result [local] (local) in addtobase
+  Node 24: base [global] (global)
+  Node 25: x [local] (param) in addtobase
+  Node 26: result [local] (local) in addtobase
+  Node 27: answer [main] (main)
+  Node 28: base [global] (global)
+  Node 29: answer [main] (main)
+  Node 30: answer [main] (main)
+=== END SYMBOL TABLE REPORT ===
+
+
+=== SUCCESS: No errors found ===
+
+✅ TEST PASSED: TEST 13: Global Variable Access from Function
+
+======================================================================
+TEST: TEST 14: Undeclared Variable in Procedure
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {
+            myproc() {
+                local {
+                    x
+                }
+                y = 10
+            }
+        }
+        func {}
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: {'myproc'}
+Function Names: set()
+
+Symbol Table Entries:
+  Node 10: x [local] (local) in myproc
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: undeclared: UNDECLARED-VARIABLE: 'y' in procedure 'myproc'
+
+✅ TEST PASSED: TEST 14: Undeclared Variable in Procedure
+
+======================================================================
+TEST: TEST 15: Undeclared Variable in Function
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {
+            myfunc() {
+                local {
+                    x
+                }
+                y = 10;
+                return y
+            }
+        }
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: set()
+Function Names: {'myfunc'}
+
+Symbol Table Entries:
+  Node 11: x [local] (local) in myfunc
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: undeclared: UNDECLARED-VARIABLE: 'y' in function 'myfunc'
+ERROR: undeclared: UNDECLARED-VARIABLE: 'y' in function 'myfunc'
+
+✅ TEST PASSED: TEST 15: Undeclared Variable in Function
+
+======================================================================
+TEST: TEST 16: Variable Name Same as Procedure Name
+======================================================================
+SPL Code:
+
+        glob {
+            myproc
+        }
+        proc {
+            myproc() {
+                local {}
+                halt
+            }
+        }
+        func {}
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: {'myproc'}
+Procedure Names: {'myproc'}
+Function Names: set()
+
+Symbol Table Entries:
+  Node 8: myproc [global] (global)
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: NAME-RULE-VIOLATION: Variable name 'myproc' conflicts with procedure name
+
+✅ TEST PASSED: TEST 16: Variable Name Same as Procedure Name
+
+======================================================================
+TEST: TEST 17: Variable Name Same as Function Name
+======================================================================
+SPL Code:
+
+        glob {
+            myfunc
+        }
+        proc {}
+        func {
+            myfunc() {
+                local {}
+                return 0
+            }
+        }
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: {'myfunc'}
+Procedure Names: set()
+Function Names: {'myfunc'}
+
+Symbol Table Entries:
+  Node 8: myfunc [global] (global)
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: NAME-RULE-VIOLATION: Variable name 'myfunc' conflicts with function name
+
+✅ TEST PASSED: TEST 17: Variable Name Same as Function Name
+
+======================================================================
+TEST: TEST 18: Function Name Same as Procedure Name
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {
+            duplicate() {
+                local {}
+                halt
+            }
+        }
+        func {
+            duplicate() {
+                local {}
+                return 0
+            }
+        }
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: {'duplicate'}
+Function Names: {'duplicate'}
+
+Symbol Table Entries:
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: NAME-RULE-VIOLATION: Function name 'duplicate' conflicts with procedure name
+
+✅ TEST PASSED: TEST 18: Function Name Same as Procedure Name
+
+======================================================================
+TEST: TEST 19: Multiple Procedures with Different Names
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {
+            proc1() {
+                local {}
+                halt
+            }
+            proc2() {
+                local {}
+                halt
+            }
+            proc3() {
+                local {}
+                halt
+            }
+        }
+        func {}
+        main {
+            var {}
+            proc1();
+            proc2();
+            proc3()
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: {'proc2', 'proc1', 'proc3'}
+Function Names: set()
+
+Symbol Table Entries:
+=== END SYMBOL TABLE REPORT ===
+
+
+=== SUCCESS: No errors found ===
+
+✅ TEST PASSED: TEST 19: Multiple Procedures with Different Names
+
+======================================================================
+TEST: TEST 20: Duplicate Procedure Names
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {
+            proc1() {
+                local {}
+                halt
+            }
+            proc1() {
+                local {}
+                halt
+            }
+        }
+        func {}
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: {'proc1'}
+Function Names: set()
+
+Symbol Table Entries:
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: NAME-RULE-VIOLATION: double-declaration: Duplicate procedure declaration: 'proc1'
+
+✅ TEST PASSED: TEST 20: Duplicate Procedure Names
+
+======================================================================
+TEST: TEST 21: Multiple Functions with Different Names
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {
+            func1() {
+                local {}
+                return 1
+            }
+            func2() {
+                local {}
+                return 2
+            }
+        }
+        main {
+            var {
+                a
+                b
+            }
+            a = func1();
+            b = func2()
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: set()
+Function Names: {'func1', 'func2'}
+
+Symbol Table Entries:
+  Node 12: a [main] (main)
+  Node 13: b [main] (main)
+  Node 14: a [main] (main)
+  Node 15: b [main] (main)
+=== END SYMBOL TABLE REPORT ===
+
+
+=== SUCCESS: No errors found ===
+
+✅ TEST PASSED: TEST 21: Multiple Functions with Different Names
+
+======================================================================
+TEST: TEST 22: Duplicate Function Names
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {
+            func1() {
+                local {}
+                return 1
+            }
+            func1() {
+                local {}
+                return 2
+            }
+        }
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: set()
+Function Names: {'func1'}
+
+Symbol Table Entries:
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: NAME-RULE-VIOLATION: double-declaration: Duplicate function declaration: 'func1'
+
+✅ TEST PASSED: TEST 22: Duplicate Function Names
+
+======================================================================
+TEST: TEST 23: Procedure Parameter Double Declaration
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {
+            myproc(a b a) {
+                local {}
+                halt
+            }
+        }
+        func {}
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: {'myproc'}
+Function Names: set()
+
+Symbol Table Entries:
+  Node 8: a [local] (param) in myproc
+  Node 9: b [local] (param) in myproc
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: NAME-RULE-VIOLATION: double-declaration: Duplicate parameter in procedure 'myproc': 'a'
+
+✅ TEST PASSED: TEST 23: Procedure Parameter Double Declaration
+
+======================================================================
+TEST: TEST 24: Function Parameter Double Declaration
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {
+            myfunc(x y x) {
+                local {}
+                return 0
+            }
+        }
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: set()
+Function Names: {'myfunc'}
+
+Symbol Table Entries:
+  Node 8: x [local] (param) in myfunc
+  Node 9: y [local] (param) in myfunc
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: NAME-RULE-VIOLATION: double-declaration: Duplicate parameter in function 'myfunc': 'x'
+
+✅ TEST PASSED: TEST 24: Function Parameter Double Declaration
+
+======================================================================
+TEST: TEST 25: Procedure Local Variable Double Declaration
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {
+            myproc() {
+                local {
+                    temp
+                    result
+                    temp
+                }
+                halt
+            }
+        }
+        func {}
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: {'myproc'}
+Function Names: set()
+
+Symbol Table Entries:
+  Node 8: temp [local] (local) in myproc
+  Node 9: result [local] (local) in myproc
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: NAME-RULE-VIOLATION: double-declaration: Duplicate local variable in procedure 'myproc': 'temp'
+
+✅ TEST PASSED: TEST 25: Procedure Local Variable Double Declaration
+
+======================================================================
+TEST: TEST 26: Function Local Variable Double Declaration
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {
+            myfunc() {
+                local {
+                    temp
+                    result
+                    temp
+                }
+                return 0
+            }
+        }
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: set()
+Function Names: {'myfunc'}
+
+Symbol Table Entries:
+  Node 8: temp [local] (local) in myfunc
+  Node 9: result [local] (local) in myfunc
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: NAME-RULE-VIOLATION: double-declaration: Duplicate local variable in function 'myfunc': 'temp'
+
+✅ TEST PASSED: TEST 26: Function Local Variable Double Declaration
+
+======================================================================
+TEST: TEST 27: Complex Scope Hierarchy
+======================================================================
+SPL Code:
+
+        glob {
+            globalx
+            globaly
+        }
+        proc {
+            proca(parama) {
+                local {
+                    locala
+                }
+                locala = (parama plus globalx);
+                globaly = locala
+            }
+        }
+        func {
+            funcb(paramb) {
+                local {
+                    localb
+                }
+                localb = (paramb mult globalx);
+                return localb
+            }
+        }
+        main {
+            var {
+                mainx
+                mainy
+            }
+            globalx = 10;
+            globaly = 20;
+            mainx = 5;
+            proca(mainx);
+            mainy = funcb(mainx);
+            print mainy
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: {'globaly', 'globalx'}
+Procedure Names: {'proca'}
+Function Names: {'funcb'}
+
+Symbol Table Entries:
+  Node 39: globalx [global] (global)
+  Node 40: globaly [global] (global)
+  Node 41: parama [local] (param) in proca
+  Node 42: locala [local] (local) in proca
+  Node 43: locala [local] (local) in proca
+  Node 44: parama [local] (param) in proca
+  Node 45: globalx [global] (global)
+  Node 46: globaly [global] (global)
+  Node 47: locala [local] (local) in proca
+  Node 48: paramb [local] (param) in funcb
+  Node 49: localb [local] (local) in funcb
+  Node 50: localb [local] (local) in funcb
+  Node 51: paramb [local] (param) in funcb
+  Node 52: globalx [global] (global)
+  Node 53: localb [local] (local) in funcb
+  Node 54: mainx [main] (main)
+  Node 55: mainy [main] (main)
+  Node 56: globalx [global] (global)
+  Node 57: globaly [global] (global)
+  Node 58: mainx [main] (main)
+  Node 59: mainx [main] (main)
+  Node 60: mainy [main] (main)
+  Node 61: mainx [main] (main)
+  Node 62: mainy [main] (main)
+=== END SYMBOL TABLE REPORT ===
+
+
+=== SUCCESS: No errors found ===
+
+✅ TEST PASSED: TEST 27: Complex Scope Hierarchy
+
+======================================================================
+TEST: TEST 28: Empty Scopes
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {}
+            halt
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: set()
+Function Names: set()
+
+Symbol Table Entries:
+=== END SYMBOL TABLE REPORT ===
+
+
+=== SUCCESS: No errors found ===
+
+✅ TEST PASSED: TEST 28: Empty Scopes
+
+======================================================================
+TEST: TEST 29: Same Variable Name in Different Local Scopes
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {
+            proc1() {
+                local {
+                    temp
+                }
+                temp = 10
+            }
+            proc2() {
+                local {
+                    temp
+                }
+                temp = 20
+            }
+        }
+        func {}
+        main {
+            var {}
+            proc1();
+            proc2()
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: {'proc2', 'proc1'}
+Function Names: set()
+
+Symbol Table Entries:
+  Node 16: temp [local] (local) in proc1
+  Node 17: temp [local] (local) in proc1
+  Node 18: temp [local] (local) in proc2
+  Node 19: temp [local] (local) in proc2
+=== END SYMBOL TABLE REPORT ===
+
+
+=== SUCCESS: No errors found ===
+
+✅ TEST PASSED: TEST 29: Same Variable Name in Different Local Scopes
+
+======================================================================
+TEST: TEST 30: Undeclared Procedure Call
+======================================================================
+SPL Code:
+
+        glob {}
+        proc {}
+        func {}
+        main {
+            var {}
+            undeclaredproc()
+        }
+        
+----------------------------------------------------------------------
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: set()
+Function Names: set()
+
+Symbol Table Entries:
+=== END SYMBOL TABLE REPORT ===
+
+
+=== ERRORS ===
+ERROR: undeclared: Undeclared procedure or function: 'undeclaredproc'
+
+✅ TEST PASSED: TEST 30: Undeclared Procedure Call
+
+======================================================================
+TEST SUMMARY
+======================================================================
+✅ TEST 1: Simple Global Variables: PASSED
+✅ TEST 2: Global Variable Double Declaration: PASSED
+✅ TEST 3: Procedure with Parameters: PASSED
+✅ TEST 4: Procedure with Local Variables: PASSED
+✅ TEST 5: Parameter Shadowing by Local Variable: PASSED
+✅ TEST 6: Function with Return: PASSED
+✅ TEST 7: Function Parameter Shadowing: PASSED
+✅ TEST 8: Main Local Variables: PASSED
+✅ TEST 9: Main Variable Double Declaration: PASSED
+✅ TEST 10: Undeclared Variable in Main: PASSED
+✅ TEST 11: Global Variable Access from Main: PASSED
+✅ TEST 12: Global Variable Access from Procedure: PASSED
+✅ TEST 13: Global Variable Access from Function: PASSED
+✅ TEST 14: Undeclared Variable in Procedure: PASSED
+✅ TEST 15: Undeclared Variable in Function: PASSED
+✅ TEST 16: Variable Name Same as Procedure Name: PASSED
+✅ TEST 17: Variable Name Same as Function Name: PASSED
+✅ TEST 18: Function Name Same as Procedure Name: PASSED
+✅ TEST 19: Multiple Procedures with Different Names: PASSED
+✅ TEST 20: Duplicate Procedure Names: PASSED
+✅ TEST 21: Multiple Functions with Different Names: PASSED
+✅ TEST 22: Duplicate Function Names: PASSED
+✅ TEST 23: Procedure Parameter Double Declaration: PASSED
+✅ TEST 24: Function Parameter Double Declaration: PASSED
+✅ TEST 25: Procedure Local Variable Double Declaration: PASSED
+✅ TEST 26: Function Local Variable Double Declaration: PASSED
+✅ TEST 27: Complex Scope Hierarchy: PASSED
+✅ TEST 28: Empty Scopes: PASSED
+✅ TEST 29: Same Variable Name in Different Local Scopes: PASSED
+✅ TEST 30: Undeclared Procedure Call: PASSED
+----------------------------------------------------------------------
+Total Tests: 30
+Passed: 30
+Failed: 0
+Success Rate: 100.0%
+======================================================================

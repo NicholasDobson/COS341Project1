@@ -1,0 +1,82 @@
+Phase 1: Lexical Analysis...
+Phase 2: Syntax Analysis...
+Phase 3: NAME-SCOPE-RULES Analysis...
+Starting NAME-SCOPE-RULES analysis...
+NAME-SCOPE-RULES analysis completed.
+
+=== SYMBOL TABLE REPORT ===
+Global Variables: set()
+Procedure Names: set()
+Function Names: set()
+
+Symbol Table Entries:
+  Node 37: x [main] (main)
+  Node 38: y [main] (main)
+  Node 39: x [main] (main)
+  Node 40: y [main] (main)
+  Node 41: x [main] (main)
+  Node 42: y [main] (main)
+  Node 43: x [main] (main)
+  Node 44: x [main] (main)
+  Node 45: x [main] (main)
+  Node 46: x [main] (main)
+=== END SYMBOL TABLE REPORT ===
+
+Phase 4: Type Analysis (COS341 Formal Rules)...
+x is TermNode
+x is TermNode
+x is TermNode
+✅ Type analysis passed - program is correctly typed
+Phase 5: Code Generation...
+Phase 5: Code Generation (COS341 Translation Rules)...
+
+=== SUCCESS: No errors found ===
+
+=== INTERMEDIATE CODE (Before Label Processing) ===
+   1: x = 10
+   2: y = 5
+   3: _t1 = x > y
+   4: IF NOT _t1 GOTO _L1
+   5: PRINT 1
+   6: GOTO _L2
+   7: _L1:
+   8: PRINT 0
+   9: _L2:
+  10: _L3:
+  11: _t2 = x > 0
+  12: IF NOT _t2 GOTO _L4
+  13: _t3 = x - 1
+  14: x = _t3
+  15: PRINT x
+  16: GOTO _L3
+  17: _L4:
+
+=== PHASE 6: Processing Labels and Jumps ===
+
+Label Mapping:
+  _L1             -> Line 7
+  _L2             -> Line 9
+  _L3             -> Line 10
+  _L4             -> Line 17
+
+=== FINAL EXECUTABLE CODE ===
+   1: x = 10
+   2: y = 5
+   3: _t1 = x > y
+   4: IF NOT _t1 GOTO 7
+   5: PRINT 1
+   6: GOTO 9
+   7: REM _L1
+   8: PRINT 0
+   9: REM _L2
+  10: REM _L3
+  11: _t2 = x > 0
+  12: IF NOT _t2 GOTO 17
+  13: _t3 = x - 1
+  14: x = _t3
+  15: PRINT x
+  16: GOTO 10
+  17: REM _L4
+
+Final executable code written to output.txt
+Compilation successful!

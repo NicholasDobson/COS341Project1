@@ -8,13 +8,13 @@ main {
     }
     x = 10;
     y = 5;
-    if x > y {
+    if (x > y) {
         print 1
     } else {
         print 0
     };
-    while x > 0 {
-        x = x minus 1;
+    while (x > 0) {
+        x = (x minus 1);
         print x
     }
 }

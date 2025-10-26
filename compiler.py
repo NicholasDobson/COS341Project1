@@ -1006,7 +1006,7 @@ class ScopeAnalyzer:
         # Collect global variables
         for var in self.ast.variables:
             if var in self.global_variables:
-                self.emit_name_rule_violation(f"Duplicate global variable declaration: '{var}'")
+                self.emit_name_rule_violation(f"double-declaration: Duplicate global variable declaration: '{var}'")
             else:
                 self.global_variables.add(var)
                 self.st.global_vars.add(var)
@@ -1023,7 +1023,7 @@ class ScopeAnalyzer:
         # Collect procedure names
         for proc in self.ast.procedures:
             if proc.name in self.procedure_names:
-                self.emit_name_rule_violation(f"Duplicate procedure declaration: '{proc.name}'")
+                self.emit_name_rule_violation(f"double-declaration: Duplicate procedure declaration: '{proc.name}'")
             else:
                 self.procedure_names.add(proc.name)
                 self.st.procedures[proc.name] = FunctionInfo(
@@ -1033,7 +1033,7 @@ class ScopeAnalyzer:
         # Collect function names
         for func in self.ast.functions:
             if func.name in self.function_names:
-                self.emit_name_rule_violation(f"Duplicate function declaration: '{func.name}'")
+                self.emit_name_rule_violation(f"double-declaration: Duplicate function declaration: '{func.name}'")
             else:
                 self.function_names.add(func.name)
                 self.st.functions[func.name] = FunctionInfo(
@@ -1103,7 +1103,7 @@ class ScopeAnalyzer:
         main_vars = set()
         for var in self.ast.main.variables:
             if var in main_vars:
-                self.emit_name_rule_violation(f"Duplicate variable declaration in main: '{var}'")
+                self.emit_name_rule_violation(f"double-declaration: Duplicate variable declaration in main: '{var}'")
             else:
                 main_vars.add(var)
                 # Add to symbol table
@@ -1132,7 +1132,7 @@ class ScopeAnalyzer:
         param_set = set()
         for param in proc.params:
             if param in param_set:
-                self.emit_name_rule_violation(f"Duplicate parameter in procedure '{proc.name}': '{param}'")
+                self.emit_name_rule_violation(f"double-declaration: Duplicate parameter in procedure '{proc.name}': '{param}'")
             else:
                 param_set.add(param)
                 # Add parameter to symbol table
@@ -1150,9 +1150,9 @@ class ScopeAnalyzer:
         local_set = set()
         for local_var in proc.local_vars:
             if local_var in local_set:
-                self.emit_name_rule_violation(f"Duplicate local variable in procedure '{proc.name}': '{local_var}'")
+                self.emit_name_rule_violation(f"double-declaration: Duplicate local variable in procedure '{proc.name}': '{local_var}'")
             elif local_var in param_set:
-                self.emit_name_rule_violation(f"Local variable '{local_var}' shadows parameter in procedure '{proc.name}'")
+                self.emit_name_rule_violation(f"shadowing: Local variable '{local_var}' shadows parameter in procedure '{proc.name}'")
             else:
                 local_set.add(local_var)
                 # Add local variable to symbol table
@@ -1181,7 +1181,7 @@ class ScopeAnalyzer:
         param_set = set()
         for param in func.params:
             if param in param_set:
-                self.emit_name_rule_violation(f"Duplicate parameter in function '{func.name}': '{param}'")
+                self.emit_name_rule_violation(f"double-declaration: Duplicate parameter in function '{func.name}': '{param}'")
             else:
                 param_set.add(param)
                 # Add parameter to symbol table
@@ -1199,9 +1199,9 @@ class ScopeAnalyzer:
         local_set = set()
         for local_var in func.local_vars:
             if local_var in local_set:
-                self.emit_name_rule_violation(f"Duplicate local variable in function '{func.name}': '{local_var}'")
+                self.emit_name_rule_violation(f"double-declaration: Duplicate local variable in function '{func.name}': '{local_var}'")
             elif local_var in param_set:
-                self.emit_name_rule_violation(f"Local variable '{local_var}' shadows parameter in function '{func.name}'")
+                self.emit_name_rule_violation(f"shadowing: Local variable '{local_var}' shadows parameter in function '{func.name}'")
             else:
                 local_set.add(local_var)
                 # Add local variable to symbol table
@@ -1295,6 +1295,11 @@ class ScopeAnalyzer:
                              params: List[str], local_vars: List[str], main_vars: List[str],
                              procedure_name: str = None, function_name: str = None):
         """Analyze variables in function/procedure call arguments."""
+        # First, check if the called procedure/function is declared
+        if call.name not in self.procedure_names and call.name not in self.function_names:
+            self.st.add_error(f"undeclared: Undeclared procedure or function: '{call.name}'")
+        
+        # Then check the arguments
         for arg in call.args:
             if arg.is_var:
                 self.check_variable_declaration(arg.value, current_scope, params, local_vars,
@@ -1408,7 +1413,7 @@ class ScopeAnalyzer:
     
     def emit_undeclared_variable(self, var_name: str, context: str):
         """Emit an undeclared-variable notification."""
-        self.st.add_error(f"UNDECLARED-VARIABLE: '{var_name}' in {context}")
+        self.st.add_error(f"undeclared: UNDECLARED-VARIABLE: '{var_name}' in {context}")
     
     def print_symbol_table_report(self):
         """Print a detailed report of the symbol table for debugging."""
@@ -1440,7 +1445,7 @@ class ScopeAnalyzer:
         param_set = set(proc.params)
         for local_var in proc.local_vars:
             if local_var in param_set:
-                self.st.add_error(f"Local variable '{local_var}' shadows parameter in procedure {proc.name}")
+                self.st.add_error(f"shadowing: Local variable '{local_var}' shadows parameter in procedure {proc.name}")
                 
         # Analyze body
         if proc.body:
@@ -1456,7 +1461,7 @@ class ScopeAnalyzer:
         param_set = set(func.params)
         for local_var in func.local_vars:
             if local_var in param_set:
-                self.st.add_error(f"Local variable '{local_var}' shadows parameter in function {func.name}")
+                self.st.add_error(f"shadowing: Local variable '{local_var}' shadows parameter in function {func.name}")
                 
         if func.body:
             self.analyze_algo(func.body, func.params, func.local_vars, ScopeType.LOCAL)
@@ -2043,8 +2048,7 @@ class TypeAnalyzer:
             return VarType.NUMERIC
         elif unop_type == VarType.BOOLEAN:
             # 'not' operator can work with boolean or numeric operands
-            # if operand_type in [VarType.BOOLEAN, VarType.NUMERIC]:
-            if operand_type == VarType.BOOLEAN:
+            if operand_type in [VarType.BOOLEAN, VarType.NUMERIC]:
                 return VarType.BOOLEAN
             else:
                 self.st.add_error(f"UNOP '{term.op}' requires 'boolean' or 'numeric' operand, got '{operand_type.value}'")
@@ -2147,6 +2151,8 @@ class CodeGenerator:
         """
         Generate target code following COS341 translation rules.
         Variable declarations are NOT translated (only used for symbol table).
+        Returns plain intermediate code WITHOUT line numbers.
+        Line numbers will be added later after label processing.
         """
         if not self.ast:
             return []
@@ -2162,11 +2168,9 @@ class CodeGenerator:
         if self.ast.main:
             self.generate_main_algo(self.ast.main)
 
-        # After generating raw instructions, assign consecutive line numbers
-        # (use increments of 10 by default) and build a mapping from labels
-        # to their corresponding line numbers.
-        self.numbered_code = self.number_instructions(increment=10, start=10)
-        return self.numbered_code
+        # Return plain code without line numbers
+        # Line numbering will be done AFTER label processing
+        return self.code
 
     def number_instructions(self, increment: int = 10, start: int = 10) -> List[str]:
         """
@@ -2679,103 +2683,6 @@ class CodeGenerator:
 
 
 # ============================================================================
-# LABEL AND JUMP PROCESSING
-# ============================================================================
-
-def process_labels_and_jumps(intermediate_code: List[str]) -> Tuple[List[str], Dict[str, int]]:
-    """
-    Process labels and jumps in intermediate code.
-    
-    This function:
-    1. Scans through the intermediate code to find all label definitions
-    2. Creates a mapping of label names to their line numbers
-    3. Replaces all GOTO label references with GOTO line_number
-    4. Replaces all THEN label references with THEN line_number
-    5. Processes REM label statements
-    
-    Args:
-        intermediate_code: List of intermediate code lines (may contain labels)
-    
-    Returns:
-        Tuple of (final_code, label_map) where:
-        - final_code is the code with resolved jumps
-        - label_map is a dictionary mapping label names to line numbers
-    
-    Examples:
-        Input:
-            _L1:
-            x = 10
-            IF x > 5 THEN _L1
-            GOTO _L1
-        
-        Output:
-            REM _L1
-            x = 10
-            IF x > 5 THEN 1
-            GOTO 1
-            
-        Label Map: {'_L1': 1}
-    """
-    label_map: Dict[str, int] = {}
-    cleaned_code: List[str] = []
-    
-    line_number = 1
-    for code_line in intermediate_code:
-        stripped = code_line.strip()
-        
-        if stripped.endswith(':'):
-            label_name = stripped[:-1].strip()
-            label_map[label_name] = line_number
-            cleaned_code.append(f"REM {label_name}")
-            line_number += 1
-        elif stripped.startswith('REM '):
-            cleaned_code.append(code_line)
-            line_number += 1
-        elif stripped:  # Non-empty line
-            cleaned_code.append(code_line)
-            line_number += 1
-        elif not stripped and intermediate_code.index(code_line) < len(intermediate_code) - 1:
-            cleaned_code.append(code_line)
-    
-    final_code: List[str] = []
-    
-    for code_line in cleaned_code:
-        modified_line = code_line
-        
-        if 'GOTO ' in modified_line:
-            parts = modified_line.split('GOTO ')
-            if len(parts) > 1:
-                after_goto = parts[1].strip()
-                label_parts = after_goto.split()
-                if label_parts:
-                    potential_label = label_parts[0]
-                    if potential_label in label_map:
-                        target_line = label_map[potential_label]
-                        modified_line = modified_line.replace(
-                            f'GOTO {potential_label}',
-                            f'GOTO {target_line}'
-                        )
-        
-        if 'THEN ' in modified_line:
-            parts = modified_line.split('THEN ')
-            if len(parts) > 1:
-                after_then = parts[1].strip()
-                label_parts = after_then.split()
-                if label_parts:
-                    potential_label = label_parts[0]
-                    if potential_label in label_map:
-                        target_line = label_map[potential_label]
-                        modified_line = modified_line.replace(
-                            f'THEN {potential_label}',
-                            f'THEN {target_line}'
-                        )
-        
-        final_code.append(modified_line)
-    
-    return final_code, label_map
-
-
-# ============================================================================
 # MAIN COMPILER
 # ============================================================================
 
@@ -2806,6 +2713,119 @@ def compile_spl_with_antlr(source_code: str, output_file: str = None) -> bool:
     except Exception as e:
         print(f"ANTLR parsing failed: {e}")
         return False
+
+# ============================================================================
+# LABEL AND JUMP PROCESSING
+# ============================================================================
+
+def process_labels_and_jumps(intermediate_code: List[str]) -> Tuple[List[str], Dict[str, int]]:
+    """
+    Process labels and jumps in intermediate code.
+    
+    This function:
+    1. Scans through the intermediate code to find all label definitions
+    2. Creates a mapping of label names to their line numbers
+    3. Replaces all GOTO label references with GOTO line_number
+    4. Replaces all THEN label references with THEN line_number
+    5. Converts label definitions to REM statements
+    
+    Args:
+        intermediate_code: List of intermediate code lines (may contain labels)
+    
+    Returns:
+        Tuple of (final_code, label_map) where:
+        - final_code is the code with resolved jumps
+        - label_map is a dictionary mapping label names to line numbers
+    
+    Examples:
+        Input:
+            _L1:
+            x = 10
+            IF x > 5 THEN _L1
+            GOTO _L1
+        
+        Output:
+            REM _L1
+            x = 10
+            IF x > 5 THEN 1
+            GOTO 1
+            
+        Label Map: {'_L1': 1}
+    """
+    # Phase 1: Build label map by scanning code
+    label_map: Dict[str, int] = {}
+    cleaned_code: List[str] = []
+    
+    # First pass: identify labels and build mapping
+    line_number = 1
+    for code_line in intermediate_code:
+        stripped = code_line.strip()
+        
+        # Check if this line is a label definition (ends with :)
+        if stripped.endswith(':'):
+            # Extract label name (remove the colon)
+            label_name = stripped[:-1].strip()
+            # Map label to current line number
+            label_map[label_name] = line_number
+            # Convert label to REM statement for documentation
+            cleaned_code.append(f"REM {label_name}")
+            line_number += 1
+        elif stripped.startswith('REM '):
+            # Already a REM statement, keep it
+            cleaned_code.append(code_line)
+            line_number += 1
+        elif stripped:  # Non-empty line
+            cleaned_code.append(code_line)
+            line_number += 1
+        # Skip completely empty lines
+    
+    # Phase 2: Replace label references with line numbers
+    final_code: List[str] = []
+    
+    for code_line in cleaned_code:
+        modified_line = code_line
+        
+        # Replace GOTO label references
+        if 'GOTO ' in modified_line:
+            parts = modified_line.split('GOTO ')
+            if len(parts) > 1:
+                # Extract the label (everything after GOTO until whitespace or end of line)
+                after_goto = parts[1].strip()
+                # Split on whitespace to get just the label
+                label_parts = after_goto.split()
+                if label_parts:
+                    potential_label = label_parts[0]
+                    # Check if this is a label we know about
+                    if potential_label in label_map:
+                        target_line = label_map[potential_label]
+                        # Replace the label with the line number
+                        modified_line = modified_line.replace(
+                            f'GOTO {potential_label}',
+                            f'GOTO {target_line}'
+                        )
+        
+        # Replace THEN label references
+        if 'THEN ' in modified_line:
+            parts = modified_line.split('THEN ')
+            if len(parts) > 1:
+                # Extract the label after THEN
+                after_then = parts[1].strip()
+                # Split on whitespace to get just the label
+                label_parts = after_then.split()
+                if label_parts:
+                    potential_label = label_parts[0]
+                    # Check if this is a label we know about
+                    if potential_label in label_map:
+                        target_line = label_map[potential_label]
+                        # Replace the label with the line number
+                        modified_line = modified_line.replace(
+                            f'THEN {potential_label}',
+                            f'THEN {target_line}'
+                        )
+        
+        final_code.append(modified_line)
+    
+    return final_code, label_map
 
 def compile_spl(source_code: str, output_file: str = None) -> bool:
     """Complete SPL compilation pipeline with hand-written parser"""
@@ -2876,13 +2896,13 @@ def continue_compilation(ast: ProgramNode, symbol_table: SymbolTable, output_fil
     else:
         print("No labels found in code.")
     
-    print("\n=== FINAL EXECUTABLE CODE (Line-Numbered BASIC) ===")
+    print("\n=== FINAL EXECUTABLE CODE ===")
     for i, line in enumerate(final_code, 1):
         print(f"{i:4d}: {line}")
     
     if output_file:
         with open(output_file, 'w') as f:
-            # Write with line numbers for BASIC format
+            # Write with line numbers for BASIC format (multiples of 10)
             for i, line in enumerate(final_code, 1):
                 if line.strip():  # Only write non-empty lines
                     f.write(f"{i * 10} {line}\n")

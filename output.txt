@@ -1,0 +1,17 @@
+10 x = 10
+20 y = 5
+30 _t1 = x > y
+40 IF NOT _t1 GOTO 7
+50 PRINT 1
+60 GOTO 9
+70 REM _L1
+80 PRINT 0
+90 REM _L2
+100 REM _L3
+110 _t2 = x > 0
+120 IF NOT _t2 GOTO 17
+130 _t3 = x - 1
+140 x = _t3
+150 PRINT x
+160 GOTO 10
+170 REM _L4

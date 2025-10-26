@@ -222,7 +222,7 @@ def main():
                 x
             }
             x = 10;
-            if x > 5 {
+            if (x > 5) {
                 print x
             }
         }
@@ -244,7 +244,7 @@ def main():
                 y
             }
             x = 10;
-            if x > 5 {
+            if (x > 5) {
                 y = 1
             } else {
                 y = 0
@@ -268,8 +268,8 @@ def main():
                 counter
             }
             counter = 0;
-            while counter > 10 {
-                counter = counter plus 1;
+            while (counter > 10) {
+                counter = (counter plus 1);
                 print counter
             }
         }
@@ -291,9 +291,9 @@ def main():
             }
             i = 0;
             do {
-                i = i plus 1;
+                i = (i plus 1);
                 print i
-            } until i > 10
+            } until (i > 10)
         }
         """
     )
@@ -314,8 +314,8 @@ def main():
             }
             x = 10;
             y = 5;
-            if x > 0 {
-                if y > 0 {
+            if (x > 0) {
+                if (y > 0) {
                     print 1
                 } else {
                     print 0
@@ -342,11 +342,11 @@ def main():
                 i
             }
             x = 10;
-            if x > 5 {
+            if (x > 5) {
                 i = 0;
-                while i > 5 {
+                while (i > 5) {
                     print i;
-                    i = i plus 1
+                    i = (i plus 1)
                 }
             }
         }
@@ -371,13 +371,13 @@ def main():
             a = 1;
             b = 2;
             c = 3;
-            if a > 0 {
+            if (a > 0) {
                 print a
             };
-            if b > 0 {
+            if (b > 0) {
                 print b
             };
-            if c > 0 {
+            if (c > 0) {
                 print c
             }
         }
@@ -391,7 +391,7 @@ def main():
         "TEST 8: Complex Control Flow",
         """
         glob {
-            globalFlag
+            globalflag
         }
         proc {}
         func {}
@@ -400,19 +400,19 @@ def main():
                 x
                 i
             }
-            globalFlag = 1;
+            globalflag = 1;
             x = 0;
-            while x > 10 {
-                if globalFlag eq 1 {
+            while (x > 10) {
+                if (globalflag eq 1) {
                     i = 0;
                     do {
-                        i = i plus 1;
-                        if i > 5 {
+                        i = (i plus 1);
+                        if (i > 5) {
                             print i
                         }
-                    } until i > 3
+                    } until (i > 3)
                 };
-                x = x plus 1
+                x = (x plus 1)
             }
         }
         """
@@ -434,7 +434,7 @@ def main():
             }
             a = 10;
             b = 5;
-            if (a > 5) and (b > 0) {
+            if ((a > 5) and (b > 0)) {
                 print 1
             } else {
                 print 0
@@ -457,7 +457,7 @@ def main():
                 flag
             }
             flag = 0;
-            if not flag {
+            if (not flag) {
                 print 1
             } else {
                 print 0
@@ -474,9 +474,9 @@ def main():
         """
         glob {}
         proc {
-            checkValue(x) {
+            checkvalue(x) {
                 local {}
-                if x > 10 {
+                if (x > 10) {
                     print 1
                 } else {
                     print 0
@@ -489,7 +489,7 @@ def main():
                 val
             }
             val = 15;
-            checkValue(val)
+            checkvalue(val)
         }
         """
     )
@@ -503,16 +503,16 @@ def main():
         glob {}
         proc {}
         func {
-            sumTo(n) {
+            sumto(n) {
                 local {
                     sum
                     i
                 }
                 sum = 0;
                 i = 1;
-                while i > n {
-                    sum = sum plus i;
-                    i = i plus 1
+                while (i > n) {
+                    sum = (sum plus i);
+                    i = (i plus 1)
                 };
                 return sum
             }
@@ -521,7 +521,7 @@ def main():
             var {
                 result
             }
-            result = sumTo(10);
+            result = sumto(10);
             print result
         }
         """
@@ -566,15 +566,15 @@ def main():
                 j
             }
             i = 0;
-            while i > 5 {
+            while (i > 5) {
                 print i;
-                i = i plus 1
+                i = (i plus 1)
             };
             j = 0;
             do {
                 print j;
-                j = j plus 1
-            } until j > 5
+                j = (j plus 1)
+            } until (j > 5)
         }
         """
     )
@@ -597,9 +597,9 @@ def main():
             a = 1;
             b = 2;
             c = 3;
-            if a > 0 {
-                if b > 0 {
-                    if c > 0 {
+            if (a > 0) {
+                if (b > 0) {
+                    if (c > 0) {
                         print 1
                     } else {
                         print 2
