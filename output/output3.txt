@@ -1,6 +1,19 @@
-a = 4
-b = CALL square(a)
-_t1 = b + 10
-c = _t1
-CALL show(c)
-HALT
+1: GOTO 11
+2: showx = argshow1
+3: PRINT "value "
+4: PRINT showx
+5: RETURN
+6: squarex = argsquare1
+7: t1 = squarex * squarex
+8: squarex = t1
+9: retsquare = squarex
+10: RETURN
+11: a = 4
+12: argsquare1 = a
+13: GOSUB 6
+14: b = retsquare
+15: t2 = b + 10
+16: c = t2
+17: argshow1 = c
+18: GOSUB 2
+19: STOP

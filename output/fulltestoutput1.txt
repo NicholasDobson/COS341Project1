@@ -1,0 +1,15 @@
+1: p = 10
+2: q = 20
+3: r = adjust(p, q)
+4: t1 = r > 50
+5: t2 = p = q
+6: t3 = t1 AND t2
+7: IF NOT t3 GOTO 12
+8: t4 = r + 1
+9: decision = t4
+10: CALL report(decision)
+11: GOTO 14
+12: REM L1
+13: PRINT "No change required"
+14: REM L2
+15: STOP

@@ -1,7 +1,8 @@
-a = 5
-_t1 = a + 3
-b = _t1
-_t2 = b * 2
-c = _t2
-PRINT c
-HALT
+1: GOTO 2
+2: a = 5
+3: t1 = a + 3
+4: b = t1
+5: t2 = b * 2
+6: c = t2
+7: PRINT c
+8: STOP

@@ -1,0 +1,26 @@
+1: GOTO 14
+2: factorialnum = argfactorial1
+3: factorialresult = 1
+4: factoriali = 1
+5: IF factorialnum > 0 THEN 7
+6: GOTO 12
+7: t1 = factorialresult * factorialnum
+8: factorialresult = t1
+9: t2 = factorialnum - 1
+10: factorialnum = t2
+11: GOTO 5
+12: retfactorial = factorialresult
+13: RETURN
+14: number = 5
+15: argfactorial1 = number
+16: GOSUB 2
+17: fact = retfactorial
+18: PRINT "Factorial of 5 is:"
+19: PRINT fact
+20: count = 0
+21: PRINT count
+22: t3 = count + 1
+23: count = t3
+24: IF count = 3 THEN 26
+25: GOTO 21
+26: STOP

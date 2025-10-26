@@ -1,0 +1,36 @@
+glob {
+    g
+}
+
+proc {
+    report ( val ) {
+        local { tmp }
+        tmp = ( val plus 100 );
+        print "Result: ";
+        print tmp
+    }
+}
+
+func {
+    adjust ( a b ) {
+        local { x }
+        x = ( ( a mult b ) minus 5 );
+        return x
+    }
+}
+
+main {
+    var { p q r decision }
+    p = 10;
+    q = 20;
+    r = adjust ( p q );
+
+    if ( ( r > 50 ) and ( p eq q ) ) {
+        decision = ( r plus 1 );
+        report ( decision )
+    } else {
+        print "No change required"
+    };
+
+    halt
+}
