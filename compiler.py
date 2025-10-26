@@ -2752,72 +2752,53 @@ def process_labels_and_jumps(intermediate_code: List[str]) -> Tuple[List[str], D
             
         Label Map: {'_L1': 1}
     """
-    # Phase 1: Build label map by scanning code
     label_map: Dict[str, int] = {}
     cleaned_code: List[str] = []
     
-    # First pass: identify labels and build mapping
     line_number = 1
     for code_line in intermediate_code:
         stripped = code_line.strip()
         
-        # Check if this line is a label definition (ends with :)
         if stripped.endswith(':'):
-            # Extract label name (remove the colon)
             label_name = stripped[:-1].strip()
-            # Map label to current line number
             label_map[label_name] = line_number
-            # Convert label to REM statement for documentation
             cleaned_code.append(f"REM {label_name}")
             line_number += 1
         elif stripped.startswith('REM '):
-            # Already a REM statement, keep it
             cleaned_code.append(code_line)
             line_number += 1
         elif stripped:  # Non-empty line
             cleaned_code.append(code_line)
             line_number += 1
-        # Skip completely empty lines
     
-    # Phase 2: Replace label references with line numbers
     final_code: List[str] = []
     
     for code_line in cleaned_code:
         modified_line = code_line
         
-        # Replace GOTO label references
         if 'GOTO ' in modified_line:
             parts = modified_line.split('GOTO ')
             if len(parts) > 1:
-                # Extract the label (everything after GOTO until whitespace or end of line)
                 after_goto = parts[1].strip()
-                # Split on whitespace to get just the label
                 label_parts = after_goto.split()
                 if label_parts:
                     potential_label = label_parts[0]
-                    # Check if this is a label we know about
                     if potential_label in label_map:
                         target_line = label_map[potential_label]
-                        # Replace the label with the line number
                         modified_line = modified_line.replace(
                             f'GOTO {potential_label}',
                             f'GOTO {target_line}'
                         )
         
-        # Replace THEN label references
         if 'THEN ' in modified_line:
             parts = modified_line.split('THEN ')
             if len(parts) > 1:
-                # Extract the label after THEN
                 after_then = parts[1].strip()
-                # Split on whitespace to get just the label
                 label_parts = after_then.split()
                 if label_parts:
                     potential_label = label_parts[0]
-                    # Check if this is a label we know about
                     if potential_label in label_map:
                         target_line = label_map[potential_label]
-                        # Replace the label with the line number
                         modified_line = modified_line.replace(
                             f'THEN {potential_label}',
                             f'THEN {target_line}'
@@ -2830,12 +2811,10 @@ def process_labels_and_jumps(intermediate_code: List[str]) -> Tuple[List[str], D
 def compile_spl(source_code: str, output_file: str = None) -> bool:
     """Complete SPL compilation pipeline with hand-written parser"""
     
-    # Phase 1: Lexical Analysis
     print("Phase 1: Lexical Analysis...")
     lexer = Lexer(source_code)
     tokens = lexer.tokenize()
     
-    # Phase 2: Syntax Analysis (Parsing)
     print("Phase 2: Syntax Analysis...")
     symbol_table = SymbolTable()
     parser = Parser(tokens, symbol_table)
@@ -2851,12 +2830,10 @@ def compile_spl(source_code: str, output_file: str = None) -> bool:
 def continue_compilation(ast: ProgramNode, symbol_table: SymbolTable, output_file: str = None) -> bool:
     """Continue compilation from AST through remaining phases"""
     
-    # Phase 3: NAME-SCOPE-RULES Analysis
     print("Phase 3: NAME-SCOPE-RULES Analysis...")
     scope_analyzer = ScopeAnalyzer(ast, symbol_table)
     scope_analyzer.analyze()
     
-    # Print detailed symbol table report
     scope_analyzer.print_symbol_table_report()
     
     if symbol_table.has_errors():
@@ -2864,7 +2841,6 @@ def continue_compilation(ast: ProgramNode, symbol_table: SymbolTable, output_fil
         symbol_table.print_report()
         return False
     
-    # Phase 4: Type Analysis
     type_analyzer = TypeAnalyzer(ast, symbol_table)
     is_correctly_typed = type_analyzer.analyze()
     
@@ -2873,19 +2849,16 @@ def continue_compilation(ast: ProgramNode, symbol_table: SymbolTable, output_fil
         symbol_table.print_report()
         return False
     
-    # Phase 5: Code Generation (COS341 Translation Rules)
     print("Phase 5: Code Generation...")
     code_generator = CodeGenerator(ast, symbol_table)
     intermediate_code = code_generator.generate()
     
-    # Output results
     symbol_table.print_report()
     
     print("\n=== INTERMEDIATE CODE (Before Label Processing) ===")
     for i, line in enumerate(intermediate_code, 1):
         print(f"{i:4d}: {line}")
     
-    # Phase 6: Process Labels and Jumps
     print("\n=== PHASE 6: Processing Labels and Jumps ===")
     final_code, label_map = process_labels_and_jumps(intermediate_code)
     
@@ -2902,9 +2875,8 @@ def continue_compilation(ast: ProgramNode, symbol_table: SymbolTable, output_fil
     
     if output_file:
         with open(output_file, 'w') as f:
-            # Write with line numbers for BASIC format (multiples of 10)
             for i, line in enumerate(final_code, 1):
-                if line.strip():  # Only write non-empty lines
+                if line.strip():
                     f.write(f"{i * 10} {line}\n")
         print(f"\nFinal executable code written to {output_file}")
     

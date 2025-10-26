@@ -21,7 +21,6 @@ import sys
 import os
 from pathlib import Path
 
-# Add parent directory to path to import compiler
 sys.path.insert(0, str(Path(__file__).parent))
 
 from compiler import (
@@ -929,10 +928,8 @@ def main():
         expected_errors=["undeclared"]
     )
     
-    # Print final summary
     runner.print_summary()
     
-    # Return exit code
     return 0 if runner.tests_failed == 0 else 1
 
 
