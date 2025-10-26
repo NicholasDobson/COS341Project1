@@ -10,7 +10,7 @@ Requirements:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Any
+from typing import Dict, List, Optional, Set, Any, Tuple
 from enum import Enum
 import sys
 import os
@@ -2679,6 +2679,103 @@ class CodeGenerator:
 
 
 # ============================================================================
+# LABEL AND JUMP PROCESSING
+# ============================================================================
+
+def process_labels_and_jumps(intermediate_code: List[str]) -> Tuple[List[str], Dict[str, int]]:
+    """
+    Process labels and jumps in intermediate code.
+    
+    This function:
+    1. Scans through the intermediate code to find all label definitions
+    2. Creates a mapping of label names to their line numbers
+    3. Replaces all GOTO label references with GOTO line_number
+    4. Replaces all THEN label references with THEN line_number
+    5. Processes REM label statements
+    
+    Args:
+        intermediate_code: List of intermediate code lines (may contain labels)
+    
+    Returns:
+        Tuple of (final_code, label_map) where:
+        - final_code is the code with resolved jumps
+        - label_map is a dictionary mapping label names to line numbers
+    
+    Examples:
+        Input:
+            _L1:
+            x = 10
+            IF x > 5 THEN _L1
+            GOTO _L1
+        
+        Output:
+            REM _L1
+            x = 10
+            IF x > 5 THEN 1
+            GOTO 1
+            
+        Label Map: {'_L1': 1}
+    """
+    label_map: Dict[str, int] = {}
+    cleaned_code: List[str] = []
+    
+    line_number = 1
+    for code_line in intermediate_code:
+        stripped = code_line.strip()
+        
+        if stripped.endswith(':'):
+            label_name = stripped[:-1].strip()
+            label_map[label_name] = line_number
+            cleaned_code.append(f"REM {label_name}")
+            line_number += 1
+        elif stripped.startswith('REM '):
+            cleaned_code.append(code_line)
+            line_number += 1
+        elif stripped:  # Non-empty line
+            cleaned_code.append(code_line)
+            line_number += 1
+        elif not stripped and intermediate_code.index(code_line) < len(intermediate_code) - 1:
+            cleaned_code.append(code_line)
+    
+    final_code: List[str] = []
+    
+    for code_line in cleaned_code:
+        modified_line = code_line
+        
+        if 'GOTO ' in modified_line:
+            parts = modified_line.split('GOTO ')
+            if len(parts) > 1:
+                after_goto = parts[1].strip()
+                label_parts = after_goto.split()
+                if label_parts:
+                    potential_label = label_parts[0]
+                    if potential_label in label_map:
+                        target_line = label_map[potential_label]
+                        modified_line = modified_line.replace(
+                            f'GOTO {potential_label}',
+                            f'GOTO {target_line}'
+                        )
+        
+        if 'THEN ' in modified_line:
+            parts = modified_line.split('THEN ')
+            if len(parts) > 1:
+                after_then = parts[1].strip()
+                label_parts = after_then.split()
+                if label_parts:
+                    potential_label = label_parts[0]
+                    if potential_label in label_map:
+                        target_line = label_map[potential_label]
+                        modified_line = modified_line.replace(
+                            f'THEN {potential_label}',
+                            f'THEN {target_line}'
+                        )
+        
+        final_code.append(modified_line)
+    
+    return final_code, label_map
+
+
+# ============================================================================
 # MAIN COMPILER
 # ============================================================================
 
@@ -2759,19 +2856,37 @@ def continue_compilation(ast: ProgramNode, symbol_table: SymbolTable, output_fil
     # Phase 5: Code Generation (COS341 Translation Rules)
     print("Phase 5: Code Generation...")
     code_generator = CodeGenerator(ast, symbol_table)
-    target_code = code_generator.generate()
+    intermediate_code = code_generator.generate()
     
     # Output results
     symbol_table.print_report()
     
-    print("\n=== TARGET CODE (COS341 Translation Rules) ===")
-    for line in target_code:
-        print(line)
+    print("\n=== INTERMEDIATE CODE (Before Label Processing) ===")
+    for i, line in enumerate(intermediate_code, 1):
+        print(f"{i:4d}: {line}")
+    
+    # Phase 6: Process Labels and Jumps
+    print("\n=== PHASE 6: Processing Labels and Jumps ===")
+    final_code, label_map = process_labels_and_jumps(intermediate_code)
+    
+    if label_map:
+        print("\nLabel Mapping:")
+        for label, line_num in sorted(label_map.items(), key=lambda x: x[1]):
+            print(f"  {label:15s} -> Line {line_num}")
+    else:
+        print("No labels found in code.")
+    
+    print("\n=== FINAL EXECUTABLE CODE (Line-Numbered BASIC) ===")
+    for i, line in enumerate(final_code, 1):
+        print(f"{i:4d}: {line}")
     
     if output_file:
         with open(output_file, 'w') as f:
-            f.write('\n'.join(target_code))
-        print(f"\nTarget code written to {output_file}")
+            # Write with line numbers for BASIC format
+            for i, line in enumerate(final_code, 1):
+                if line.strip():  # Only write non-empty lines
+                    f.write(f"{i * 10} {line}\n")
+        print(f"\nFinal executable code written to {output_file}")
     
     return True
 
