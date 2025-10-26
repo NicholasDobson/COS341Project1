@@ -1577,6 +1577,9 @@ class CodeGenerator:
         return f"l{self.label_counter}"
 
     def emit(self, s: str):
+        trimmed = s.strip()
+        if "=" in trimmed and not trimmed.startswith(("PRINT", "IF", "GOTO", "GOSUB", "RETURN", "STOP")):
+            s = "LET " + s
         self.code.append(s)
 
     def generate(self) -> List[str]:
